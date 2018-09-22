@@ -1,0 +1,24 @@
+To make a clone map, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/manual/app_mapattr.html?highlight=mapattr
+Example: mapattr -s -R 19 -C 68 -B -P yb2t -x 12 -y -14.02 -l 0.8 mask2.map
+
+
+C:\modflow\input>del new_clone.map
+
+C:\modflow\input>mapattr -s -R 181 -C 262 -B -P yb2t -x -200.5 -y -60.5 -l 1 new
+_clone.map
+mapattr version: Jan 24 2018 (win64/msvc)
+
+C:\modflow\input>col2map --clone new_clone.map -S -m NaN -x 1 -y 2 -v 3 DEM_1509
+29_110004_correct.txt DEM_150929_110004_correct.map
+col2map version: Jan 24 2018 (win64/msvc)
+nr. of records read: 47422
+nr. of records with mv value: 0
+nr. of records with mv (x,y): 0
+nr. of records outside map: 0
+nr. of cells with mv: 0
+nr. of cells with more than one record: 0
+
+C:\modflow\input>aguila DEM_150929_110004_correct.map
+
+C:\modflow\input>
+
