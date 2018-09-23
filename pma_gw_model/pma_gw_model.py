@@ -6,8 +6,6 @@
 
 #~ from pcraster import *
 import pcraster as pcr
-
-
 from pcraster.framework import *
 
 class PantaiAirTanahModel(DynamicModel):
