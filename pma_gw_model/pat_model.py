@@ -55,11 +55,13 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # initialize modflow object - this object is unique for each sample
         self.modflow_object = pcr.initialise(pcr.clone())
         
-        # defining the layer
-        thickness = 15.0 # need info from Kim Cohen
-        bottom_elevation = interpolated_dem - thickness
-        top_elevation = interpolated_dem
-        modflow_object.createBottomLayer(bottom_elevation, top_elevation)
+        # defining the layer (one layer model), thickness (m), top and bottom elevations 
+        self.thickness = 15.0
+        # - thickness value is suggested by Kim Cohen (neede)
+        self.top_elevation    = self.input_dem
+        self.bottom_elevation = self.top_elevation - self.thickness
+        # - set one modflow layer model
+        self.modflow_object.createBottomLayer(bottom_elevation, top_elevation)
         
         # set the DIS parameter, see http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/dis.html
         #  - time and spatial units
