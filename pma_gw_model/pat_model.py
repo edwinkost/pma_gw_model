@@ -28,7 +28,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - create output folder
         cleaning_previous_output_folder = False
         try: 
-            os.makedirs()
+            os.makedirs(self.output_folder)
         except:
             if cleaning_previous_output_folder: 
 			    cmd = 'rm -r ' + self.output_folder
