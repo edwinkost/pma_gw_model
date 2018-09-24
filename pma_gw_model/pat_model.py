@@ -34,7 +34,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 			    cmd = 'rm -r ' + self.output_folder
 			    os.system(cmd)
         # go to the output folder
-        
+        os.chdir(self.output_folder)
 
         
     def premcloop(self):
