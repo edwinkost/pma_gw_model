@@ -140,7 +140,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # set conductivity values
         # - layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
-        self.modflow_object.setConductivity(00, hConductivity, vConductivity, 1)
+        self.modflow_object.setConductivity(00, self.hConductivity, self.vConductivity, 1)
 
         # set storage coefficients
         # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
