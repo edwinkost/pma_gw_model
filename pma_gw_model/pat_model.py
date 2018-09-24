@@ -46,7 +46,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # digital elevation model (m)
         self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
-
+        
     def initial(self):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
@@ -87,6 +87,12 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
         # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
+        #
+        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
+        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(7.5))
+        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
+        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
+        #
         # - horizontal and vertical conductivity
         self.hConductivity = self.sand_conductivity 
         self.vConductivity = self.hConductivity          
@@ -215,5 +221,5 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 myModel = PantaiAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=4000, firstTimestep=1)
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=16)
-mcModel.setForkSamples(fork = True, nrCPUs=16)
+mcModel.setForkSamples(fork = True, nrCPUs=4)
 mcModel.run()
