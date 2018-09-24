@@ -5,6 +5,7 @@
 from pcraster.framework import *
 
 import pcraster as pcr
+import numpy as np
 
 class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
