@@ -157,7 +157,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         tide_amplitude       = 1.0        # meter
         tide_periode_in_hour = 12.4       # hour
         tide_periode_in_day  = 12.4 / 24. # day
-        self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * timestep_in_day / (tide_periode_in_day )) )
+        self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
         print(self.tide_water_level)
         #
         # TODO: Read this from the file
