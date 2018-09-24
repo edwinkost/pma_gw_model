@@ -211,5 +211,5 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
 myModel = PantaiAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=180, firstTimestep=1)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=10)
+mcModel = MonteCarloFramework(dynamicModel, nrSamples=10, nrCPUs = 5)
 mcModel.run()
