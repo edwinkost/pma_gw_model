@@ -29,7 +29,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # set and create the output folder 
         self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
         # - create output folder
-        cleaning_previous_output_folder = False
+        cleaning_previous_output_folder = True
         try: 
             os.makedirs(self.output_folder)
         except:
