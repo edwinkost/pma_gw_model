@@ -25,7 +25,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.landmask = pcr.readmap(self.clone_map)
         
         # set and create the output folder 
-        self.output_folder = "output/test/"
+        self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
         # - create output folder
         cleaning_previous_output_folder = False
         try: 
