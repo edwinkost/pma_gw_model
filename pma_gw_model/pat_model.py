@@ -203,7 +203,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
     def postmcloop(self):
         
-        # - go to the output folder before executing MODFLOW
+        # - go to the output folder before doing some statistics
         os.chdir(self.output_folder)
 
         names = ["h"]
@@ -213,7 +213,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
 
 myModel = PantaiAirTanahModel()
-dynamicModel = DynamicFramework(myModel, lastTimeStep=40, firstTimestep=1)
+dynamicModel = DynamicFramework(myModel, lastTimeStep=4000, firstTimestep=1)
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=16)
 mcModel.setForkSamples(fork = True, nrCPUs=16)
 mcModel.run()
