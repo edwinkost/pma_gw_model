@@ -23,6 +23,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #~ # - landmask - needed if we want to mask out some areas/cells
         #~ self.landmask = pcr.readmap(self.clone_map)
         
+        # digital elevation model (m)
+        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
+
         # set and create the output folder 
         self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
         # - create output folder
@@ -47,9 +50,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - cell area (m2)
         self.cell_area   = self.cell_length * self.cell_width
 
-        # digital elevation model (m)
-        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
-    
     def initial(self):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
