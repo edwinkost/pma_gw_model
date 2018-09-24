@@ -185,10 +185,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         
         # run modflow
-        self.modflow_object.run() 
-        #~ # - execute the MODFLOW run and write all modflow temporary files to a certain folder
-        #~ temporary_folder = "temp"
-        #~ modflow_object.run(temporary_folder)
+        # - execute the MODFLOW run and write all modflow temporary files to a certain folder
+        temporary_folder = self.sampleNumbers()
+        self.modflow_object.run(temporary_folder)
         
         # get the output
         # - groundwater head (m)
