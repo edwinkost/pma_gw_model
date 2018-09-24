@@ -31,7 +31,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
             os.makedirs(self.output_folder)
         except:
             if cleaning_previous_output_folder: 
-			    cmd = 'rm -r ' + self.output_folder
+			    cmd = 'rm -r ' + self.output_folder + "/*"
 			    os.system(cmd)
         
     def premcloop(self):
