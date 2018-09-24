@@ -185,7 +185,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - go to the output folder before executing MODFLOW
         os.chdir(self.output_folder)
         # - execute the MODFLOW run and write all modflow temporary files to a certain folder
-        temporary_folder = self.sampleNumbers()
+        temporary_folder = string(self.sampleNumbers())
+        print "Sample number :" + temporary_folder
         self.modflow_object.run(temporary_folder)
         
         # get the output
