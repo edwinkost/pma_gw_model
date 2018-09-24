@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pcraster as pcr
-
 #~ from pcraster import *
 import pcraster as pcr
 
@@ -79,7 +77,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         
         # values for the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
         # - Alternative 1: all cells are active 
-        self.ibound = pcr.Spatial(pcr.nominal(1.))
+        self.ibound = pcr.spatial(pcr.nominal(1.))
         #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
         #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
         #~ pcr.aguila(self.ibound)
