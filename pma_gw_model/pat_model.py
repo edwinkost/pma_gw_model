@@ -181,7 +181,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - inactive the RIV package for dry areas
         self.bed_conductance = pcr.ifthenelse(self.bottom_morphology < self.tide_water_level, self.bed_conductance, 0.0)
         # - set the RIV package
-        self.modflow_object.setRiver(self.tide_water_level_entering_the_land, bottom_morphology, bed_conductance, 1)
+        self.modflow_object.setRiver(self.tide_water_level_entering_the_land, self.bottom_morphology, self.bed_conductance, 1)
 
         
         # run modflow
