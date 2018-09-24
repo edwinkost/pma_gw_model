@@ -203,6 +203,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
     def postmcloop(self):
         
+        # - go to the output folder before executing MODFLOW
+        os.chdir(self.output_folder)
+
         names = ["h"]
         mcaveragevariance(names, self.sampleNumbers(), self.timeSteps())
         percentiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -210,7 +213,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
 
 myModel = PantaiAirTanahModel()
-dynamicModel = DynamicFramework(myModel, lastTimeStep=180, firstTimestep=1)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=10)
-mcModel.setForkSamples(fork = True, nrCPUs=5)
+dynamicModel = DynamicFramework(myModel, lastTimeStep=40, firstTimestep=1)
+mcModel = MonteCarloFramework(dynamicModel, nrSamples=16)
+mcModel.setForkSamples(fork = True, nrCPUs=16)
 mcModel.run()
