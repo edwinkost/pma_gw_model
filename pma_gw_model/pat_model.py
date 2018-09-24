@@ -77,8 +77,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         
         # values for the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
         # - Alternative 1: all cells are active 
-        #~ self.ibound = pcr.spatial(pcr.nominal(1.))
-        self.ibound = pcr.nominal(1.)
+        self.ibound = pcr.spatial(pcr.nominal(1.))
         #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
         #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
         #~ pcr.aguila(self.ibound)
@@ -114,7 +113,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.RELAX  = 1.00               # relaxation parameter used with NPCOND = 1
         self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
-        self.modflow_object.setPCG(MXITER, ITERI, NPCOND, HCLOSE, RCLOSE, RELAX, NBPOL, DAMP)
 
         
     def dynamic(self):
