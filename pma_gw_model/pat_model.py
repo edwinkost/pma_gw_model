@@ -144,7 +144,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # set storage coefficients
         # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
-        self.modflow_object.setStorage(primary_storage_coefficient, secondary_storage_coefficient, 1)
+        self.modflow_object.setStorage(self.primary_storage_coefficient, self.secondary_storage_coefficient, 1)
 
         # set DIS parameters
         self.modflow_object.setDISParameter(self.ITMUNI, self.LENUNI, self.PERLEN, self.NSTP, self.TSMULT, self.SSTR)
