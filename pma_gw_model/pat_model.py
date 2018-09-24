@@ -49,7 +49,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.cell_area   = self.cell_length * self.cell_width
 
         # digital elevation model (m)
-        input_dem = pcr.readmap("input/DEM_150929_110004_correct.map")
+        input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
     
     def initial(self):
 
