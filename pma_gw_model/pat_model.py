@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 #~ from pcraster import *
-import pcraster as pcr
-
 from pcraster.framework import *
+
+import pcraster as pcr
 
 class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
