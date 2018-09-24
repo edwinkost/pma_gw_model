@@ -57,7 +57,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         
         # defining the layer (one layer model), thickness (m), top and bottom elevations 
         self.thickness = 15.0
-        # - thickness value is suggested by Kim Cohen (neede)
+        # - thickness value is suggested by Kim Cohen (put reference here)
         self.top_elevation    = self.input_dem
         self.bottom_elevation = self.top_elevation - self.thickness
         # - set one modflow layer model
@@ -68,72 +68,48 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         ITMUNI = 4 # indicating that the time unit is "days"
         LENUNI = 2 # indicating that the spatial unit is "meters"
         # - PERLEN: duration of stress period (days)
-        # PERLEN = 1./24. # hourly stress period
-        PERLEN = 600. / (24.*60.*60.)   # 600 seconds stress period 
+        # -- 10 minute stress period = 600 seconds stress period 
+        self.length_of_stress_period = 600. / (24.*60.*60.)  
+        PERLEN = self.length_of_stress_period 
         # - NSTP: number of sub time steps within the PERLEN
         NSTP = 1  
         # - TSMULT # always 1 by default
         TSMULT = 1
         # - SSTR: transient (0) or steady state (1)
         SSTR = 0
-        modflow_object.setDISParameter(ITMUNI, LENUNI, PERLEN, NSTP, TSMULT, SSTR)
+        self.modflow_object.setDISParameter(ITMUNI, LENUNI, PERLEN, NSTP, TSMULT, SSTR)
         
         # set the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        # - in the ocean region (x < -75 m), assume the heads will follow the tides 
-        # ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
-        ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -200., pcr.nominal(-1.), pcr.nominal(1.))
-        pcr.report(ibound, "output_transient/ibound.map")
-        if timestep == 0: pcr.aguila("output_transient/ibound.map")
-        modflow_object.setBoundary(ibound, 1)
-        
-        timestep_in_day  = timestep * PERLEN   # day
-        
-        # tide water level (m, relative to MSL)
-        tide_amplitude       = 1.0        # meter
-        tide_periode_in_hour = 12.4       # hour
-        tide_periode_in_day  = 12.4 / 24. # day
-        pi = 3.14159265359
-        #tide_water_level = tide_amplitude * pcr.sin( (2.0 * pi * timestep_in_day / (tide_periode_in_day )) * 0.0174532925 )
-        tide_water_level = tide_amplitude * np.sin( (2.0 * pi * timestep_in_day / (tide_periode_in_day )) )
-        print(tide_water_level)
+        # - Alternative 1: all cells are active 
+        self.ibound = pcr.spatial(pcr.nominal(1.))
+        #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
+        #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
+        #~ pcr.aguila(self.ibound)
+        self.modflow_object.setBoundary(self.ibound, 1)
         
         # set the initial head of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
         # - for the first test, use the DEM as initial head
-        if timestep == 0:
-            initial_head = initial_head_steady_state
-        else:
-            initial_head = groundwater_head
-        # - in the ocean (ibound = -1), groundwater head is equal to the tide
-        initial_head = pcr.ifthenelse(pcr.scalar(ibound) > 0, initial_head, tide_water_level)
-        modflow_object.setInitialHead(initial_head, 1)
+        self.initial_head = self.input_dem
+        self.modflow_object.setInitialHead(self.initial_head, 1)
         
         # set the conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
-        # - sand conductivity in m.day-1
-        sand_conductivity = pcr.spatial(pcr.scalar(10.))  # get Sebastian value
+        # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
+        self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         # - horizontal and vertical conductivity
-        hConductivity = sand_conductivity 
-        vConductivity = sand_conductivity # for 1 layer case, this is just dummy and never used
+        hConductivity = self.sand_conductivity 
+        vConductivity = hConductivity          
+        # -- for one layer model, vConductivity is just dummy and never used
         # layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
-        modflow_object.setConductivity(00, hConductivity, vConductivity, 1)
+        self.modflow_object.setConductivity(00, hConductivity, vConductivity, 1)
         
         # set the storage coefficients for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
-        # - sand porosity (m3.m-3)
-        sand_porosity = pcr.spatial(pcr.scalar(0.25))   # get Sebastian value
-        # - prtimary and secondary storage coefficients 
-        primary_storage_coefficient   = sand_porosity
-        secondary_storage_coefficient = primary_storage_coefficient  # for LAYCON = 0 (and 1), this is just dummy and never used
-        modflow_object.setStorage(primary_storage_coefficient, secondary_storage_coefficient, 1)
-        
-        # set the RIVER package
-        bottom_morphology                  = interpolated_dem
-        bed_thickness                      = 0.001
-        tide_water_level_entering_the_land = pcr.ifthenelse(bottom_morphology < tide_water_level, tide_water_level, bottom_morphology)
-        # conductance for the RIVER package (m2.day-1)
-        bed_conductance = sand_porosity * cell_area / bed_thickness
-        # - inactive the RIV package for dry areas
-        bed_conductance = pcr.ifthenelse(bottom_morphology < tide_water_level, bed_conductance, 0.0)
-        # - set the RIV package
-        modflow_object.setRiver(tide_water_level_entering_the_land, bottom_morphology, bed_conductance, 1)
+        # - sand porosity (m3.m-3)       # TODO: Find the value from Sebastian paper.
+        self.sand_porosity = pcr.spatial(pcr.scalar(0.25))   # get Sebastian value
+        # - primary and secondary storage coefficients 
+        primary_storage_coefficient   = self.sand_porosity
+        secondary_storage_coefficient = primary_storage_coefficient  
+        # -- for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
+        self.modflow_object.setStorage(primary_storage_coefficient, secondary_storage_coefficient, 1)
         
         # set the SOLVER package 
         MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
@@ -144,8 +120,36 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         RELAX  = 1.00               # relaxation parameter used with NPCOND = 1
         NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
-        modflow_object.setPCG(MXITER, ITERI, NPCOND, HCLOSE, RCLOSE, RELAX, NBPOL, DAMP)
+        self.modflow_object.setPCG(MXITER, ITERI, NPCOND, HCLOSE, RCLOSE, RELAX, NBPOL, DAMP)
         
+    def dynamic(self):
+
+        # timestep in day unit
+        timestep_in_day  = self.currentTimeStep() * self.length_of_stress_period
+        
+        # tide water level (m, relative to MSL) - assume a simple sinusoidal function
+        tide_amplitude       = 1.0        # meter
+        tide_periode_in_hour = 12.4       # hour
+        tide_periode_in_day  = 12.4 / 24. # day
+        tide_water_level = tide_amplitude * np.sin( (2.0 * pi * timestep_in_day / (tide_periode_in_day )) )
+        print(tide_water_level)
+        
+        #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide
+        #~ initial_head = pcr.ifthenelse(pcr.scalar(ibound) > 0, initial_head, tide_water_level)
+
+        # set the RIVER package
+        # - 
+        self.bottom_morphology = interpolated_dem
+        # - assume very thin 
+        self.bed_thickness                      = 0.001
+        tide_water_level_entering_the_land = pcr.ifthenelse(bottom_morphology < tide_water_level, tide_water_level, bottom_morphology)
+        # conductance for the RIVER package (m2.day-1)
+        bed_conductance = sand_porosity * cell_area / bed_thickness
+        # - inactive the RIV package for dry areas
+        bed_conductance = pcr.ifthenelse(bottom_morphology < tide_water_level, bed_conductance, 0.0)
+        # - set the RIV package
+        modflow_object.setRiver(tide_water_level_entering_the_land, bottom_morphology, bed_conductance, 1)
+
         # execute the MODFLOW run and write all modflow temporary files to a certain folder
         temporary_folder = "temp"
         modflow_object.run(temporary_folder)
@@ -164,33 +168,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         if timestep >= 1010: groundwater_tss_file_name = "output_transient/h0000001" + ".0" + str(timestep - 1000)
         pcr.report(groundwater_head, groundwater_tss_file_name)
 
-        self.snow = scalar(0)
-        self.temperatureLapseRate = 0.005 + (mapnormal() * 0.001)
-        self.report(self.temperatureLapseRate, "lapse")
-        self.temperatureCorrection = self.elevationAboveMeteoStation\
-             * self.temperatureLapseRate
-    
-    def dynamic(self):
-
-        # run modflow and report
-        
-        temperatureObserved = self.readDeterministic("tavgo")
-        precipitationObserved = self.readDeterministic("pr")
-        precipitation = max(0, precipitationObserved * (mapnormal() * 0.2 + 1.0))
-        temperature = temperatureObserved - self.temperatureCorrection
-        snowFall = ifthenelse(temperature < 0, precipitation, 0)
-        self.snow = self.snow + snowFall
-        potentialMelt = ifthenelse(temperature > 0, temperature\
-             * self.degreeDayFactor, 0)
-        actualMelt = min(self.snow, potentialMelt)
-        self.snow = max(0, self.snow - actualMelt)
-        rain = ifthenelse(temperature >= 0, precipitation, 0)
-        discharge = accuflux(self.ldd, actualMelt + rain)
-        self.report(self.snow, "s")
-        self.report(discharge, "q")
-        
     def postmcloop(self):
-        
         
         names = ["s", "q"]
         mcaveragevariance(names, self.sampleNumbers(), self.timeSteps())
