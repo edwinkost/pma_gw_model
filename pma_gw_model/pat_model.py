@@ -88,8 +88,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         #
-        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
-        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(7.5))
+        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(0.01))
+        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
         if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
         #
