@@ -121,8 +121,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # timestep in day unit
         # - a stress period contains a time step (10 minute length)
-        print self.timeSteps()
-        self.timestep_in_day  = self.timeSteps() * self.length_of_stress_period
+        self.timestep_in_day  = self.currentTimeStep() * self.length_of_stress_period
         
 
         # initialize modflow object - this object is unique for each sample and also changing over time
