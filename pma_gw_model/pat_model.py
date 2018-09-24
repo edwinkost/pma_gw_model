@@ -26,7 +26,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         
         # set and create the output folder 
         self.output_folder = "output/test/"
-        
+        # - create output folder
         cleaning_previous_output_folder = False
         try: 
             os.makedirs()
@@ -34,6 +34,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
             if cleaning_previous_output_folder: 
 			    cmd = 'rm -r ' + self.output_folder
 			    os.system(cmd)
+        # go to the output folder
+        
+
         
     def premcloop(self):
 
@@ -52,130 +55,161 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
 
-        # initialize modflow object - this object is unique for each sample
-        self.modflow_object = pcr.initialise(pcr.clone())
         
         # defining the layer (one layer model), thickness (m), top and bottom elevations 
         self.thickness = 15.0
         # - thickness value is suggested by Kim Cohen (put reference here)
         self.top_elevation    = self.input_dem
         self.bottom_elevation = self.top_elevation - self.thickness
-        # - set one modflow layer model
-        self.modflow_object.createBottomLayer(bottom_elevation, top_elevation)
-        
-        # set the DIS parameter, see http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/dis.html
+
+        # DIS parameters, see http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/dis.html
         #  - time and spatial units
-        ITMUNI = 4 # indicating that the time unit is "days"
-        LENUNI = 2 # indicating that the spatial unit is "meters"
+        self.ITMUNI = 4 # indicating that the time unit is "days"
+        self.LENUNI = 2 # indicating that the spatial unit is "meters"
         # - PERLEN: duration of stress period (days)
         # -- 10 minute stress period = 600 seconds stress period 
         self.length_of_stress_period = 600. / (24.*60.*60.)  
-        PERLEN = self.length_of_stress_period 
+        self.PERLEN = self.length_of_stress_period 
         # - NSTP: number of sub time steps within the PERLEN
-        NSTP = 1  
+        self.NSTP = 1  
         # - TSMULT # always 1 by default
-        TSMULT = 1
+        self.TSMULT = 1
         # - SSTR: transient (0) or steady state (1)
-        SSTR = 0
-        self.modflow_object.setDISParameter(ITMUNI, LENUNI, PERLEN, NSTP, TSMULT, SSTR)
+        self.SSTR = 0
         
-        # set the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
+        # values for the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
         # - Alternative 1: all cells are active 
         self.ibound = pcr.spatial(pcr.nominal(1.))
         #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
         #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
         #~ pcr.aguila(self.ibound)
-        self.modflow_object.setBoundary(self.ibound, 1)
         
-        # set the initial head of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
+        # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
         # - for the first test, use the DEM as initial head
         self.initial_head = self.input_dem
-        self.modflow_object.setInitialHead(self.initial_head, 1)
         
-        # set the conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
+        # conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
         # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         # - horizontal and vertical conductivity
-        hConductivity = self.sand_conductivity 
-        vConductivity = hConductivity          
-        # -- for one layer model, vConductivity is just dummy and never used
-        # layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
-        self.modflow_object.setConductivity(00, hConductivity, vConductivity, 1)
+        self.hConductivity = self.sand_conductivity 
+        self.vConductivity = self.hConductivity          
+        # - for one layer model, vConductivity is just dummy and never used
+        # - layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
         
-        # set the storage coefficients for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
+        # storage coefficients for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
         # - sand porosity (m3.m-3)       # TODO: Find the value from Sebastian paper.
         self.sand_porosity = pcr.spatial(pcr.scalar(0.25))   # get Sebastian value
         # - primary and secondary storage coefficients 
-        primary_storage_coefficient   = self.sand_porosity
-        secondary_storage_coefficient = primary_storage_coefficient  
-        # -- for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
-        self.modflow_object.setStorage(primary_storage_coefficient, secondary_storage_coefficient, 1)
+        self.primary_storage_coefficient   = self.sand_porosity
+        self.secondary_storage_coefficient = self.primary_storage_coefficient  
+        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
         
-        # set the SOLVER package 
-        MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
-        ITERI  = 30                 # number of inner iterations                   # Deltares use 30
-        NPCOND = 1                  # 1 - Modified Incomplete Cholesky, 2 - Polynomial matrix conditioning method
-        HCLOSE = 0.001              # HCLOSE (unit: m) 
-        RCLOSE = 0.001              # RCLOSE (unit: m3)
-        RELAX  = 1.00               # relaxation parameter used with NPCOND = 1
-        NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
-        DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
+
+        # parameter values for the SOLVER package 
+        self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
+        self.ITERI  = 30                 # number of inner iterations                   # Deltares use 30
+        self.NPCOND = 1                  # 1 - Modified Incomplete Cholesky, 2 - Polynomial matrix conditioning method
+        self.HCLOSE = 0.001              # HCLOSE (unit: m) 
+        self.RCLOSE = 0.001              # RCLOSE (unit: m3)
+        self.RELAX  = 1.00               # relaxation parameter used with NPCOND = 1
+        self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
+        self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
         self.modflow_object.setPCG(MXITER, ITERI, NPCOND, HCLOSE, RCLOSE, RELAX, NBPOL, DAMP)
+
         
     def dynamic(self):
 
+        # In this part (dynamic), the parameters/variables/objects are changing over time.  
+
         # timestep in day unit
-        timestep_in_day  = self.currentTimeStep() * self.length_of_stress_period
+        # - a stress period contains a time step (10 minute length)
+        self.timestep_in_day  = self.timeSteps() * self.length_of_stress_period
         
+
+        # initialize modflow object - this object is unique for each sample and also changing over time
+        self.modflow_object = None
+        self.modflow_object = pcr.initialise(pcr.clone())
+
+        # set one modflow layer model
+        self.modflow_object.createBottomLayer(self.bottom_elevation, self.top_elevation)
+
+        # set ibound 
+        self.modflow_object.setBoundary(self.ibound, 1)
+
+        # set initial head
+        # - for the first time step, this will be taken from the 'initial' part
+        self.modflow_object.setInitialHead(self.initial_head, 1)
+
+        # set conductivity values
+        # - layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
+        self.modflow_object.setConductivity(00, hConductivity, vConductivity, 1)
+
+        # set storage coefficients
+        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
+        self.modflow_object.setStorage(primary_storage_coefficient, secondary_storage_coefficient, 1)
+
+        # set DIS parameters
+        self.modflow_object.setDISParameter(self.ITMUNI, self.LENUNI, self.PERLEN, self.NSTP, self.TSMULT, self.SSTR)
+
+        # set SOLVER package 
+        self.modflow_object.setPCG(self.MXITER, self.ITERI, self.NPCOND, self.HCLOSE, self.RCLOSE, self.RELAX, self.NBPOL, self.DAMP)
+
         # tide water level (m, relative to MSL) - assume a simple sinusoidal function
         tide_amplitude       = 1.0        # meter
         tide_periode_in_hour = 12.4       # hour
         tide_periode_in_day  = 12.4 / 24. # day
-        tide_water_level = tide_amplitude * np.sin( (2.0 * pi * timestep_in_day / (tide_periode_in_day )) )
-        print(tide_water_level)
+        self.tide_water_level = tide_amplitude * np.sin( (2.0 * pi * timestep_in_day / (tide_periode_in_day )) )
+        print(self.tide_water_level)
+        #
+        # TODO: Read this from the file
         
-        #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide
-        #~ initial_head = pcr.ifthenelse(pcr.scalar(ibound) > 0, initial_head, tide_water_level)
+
+        #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
+        #~ self.initial_head = pcr.ifthenelse(pcr.scalar(self.ibound) > 0, self.initial_head, self.tide_water_level)
+
 
         # set the RIVER package
-        # - 
-        self.bottom_morphology = interpolated_dem
-        # - assume very thin 
-        self.bed_thickness                      = 0.001
-        tide_water_level_entering_the_land = pcr.ifthenelse(bottom_morphology < tide_water_level, tide_water_level, bottom_morphology)
-        # conductance for the RIVER package (m2.day-1)
-        bed_conductance = sand_porosity * cell_area / bed_thickness
+        # - coastal morphology (elevation)
+        self.bottom_morphology = self.top_elevation
+        # - conductance for the RIVER package (m2.day-1)
+        # -- reset bed conductance for every time step
+        self.bed_conductance = None
+        # -- assume very thin river bed thickness (m)
+        bed_thickness = 0.001
+        self.bed_conductance = self.sand_porosity * self.cell_area / bed_thickness
+        # - conductance for the RIVER package (m2.day-1)
+        self.tide_water_level_entering_the_land = pcr.ifthenelse(self.bottom_morphology < self.tide_water_level, self.tide_water_level, self.bottom_morphology)
         # - inactive the RIV package for dry areas
-        bed_conductance = pcr.ifthenelse(bottom_morphology < tide_water_level, bed_conductance, 0.0)
+        self.bed_conductance = pcr.ifthenelse(self.bottom_morphology < self.tide_water_level, self.bed_conductance, 0.0)
         # - set the RIV package
-        modflow_object.setRiver(tide_water_level_entering_the_land, bottom_morphology, bed_conductance, 1)
+        self.modflow_object.setRiver(self.tide_water_level_entering_the_land, bottom_morphology, bed_conductance, 1)
 
-        # execute the MODFLOW run and write all modflow temporary files to a certain folder
-        temporary_folder = "temp"
-        modflow_object.run(temporary_folder)
+        
+        # run modflow
+        self.modflow_object.run() 
+        #~ # - execute the MODFLOW run and write all modflow temporary files to a certain folder
+        #~ temporary_folder = "temp"
+        #~ modflow_object.run(temporary_folder)
         
         # get the output
         # - groundwater head (m)
-        groundwater_head = modflow_object.getHeads(1)
-        groundwater_head_filename = "output_transient/groundwater_head" + "_" + str(timestep) + ".map"
-        pcr.report(groundwater_head, groundwater_head_filename)
-        # pcr.aguila(groundwater_head_filename)
-        # - groundwater head (m) in time series
-        groundwater_tss_file_name = "output_transient/h0000000" + ".00" + str(timestep)
-        if timestep >= 10: groundwater_tss_file_name = "output_transient/h0000000" + ".0" + str(timestep)
-        if timestep >= 100: groundwater_tss_file_name = "output_transient/h0000000" + "." + str(timestep)
-        if timestep >= 1000: groundwater_tss_file_name = "output_transient/h0000001" + ".00" + str(timestep - 1000)
-        if timestep >= 1010: groundwater_tss_file_name = "output_transient/h0000001" + ".0" + str(timestep - 1000)
-        pcr.report(groundwater_head, groundwater_tss_file_name)
+        self.groundwater_head = self.modflow_object.getHeads(1)
+        self.report(self.groundwater_head, "h")
+        
+        # set the calculate head for the next time step
+        self.initial_head = self.groundwater_head
+
 
     def postmcloop(self):
         
-        names = ["s", "q"]
+        names = ["h"]
         mcaveragevariance(names, self.sampleNumbers(), self.timeSteps())
         percentiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         mcpercentiles(names, percentiles, self.sampleNumbers(), self.timeSteps())
 
-myModel = SnowModel()
+
+myModel = PantaiAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=180, firstTimestep=1)
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=10)
 mcModel.run()
