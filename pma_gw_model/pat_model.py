@@ -23,9 +23,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #~ # - landmask - needed if we want to mask out some areas/cells
         #~ self.landmask = pcr.readmap(self.clone_map)
         
-        # digital elevation model (m)
-        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
-
         # set and create the output folder 
         self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
         # - create output folder
@@ -36,9 +33,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
             if cleaning_previous_output_folder: 
 			    cmd = 'rm -r ' + self.output_folder
 			    os.system(cmd)
-        # go to the output folder
-        os.chdir(self.output_folder)
-
         
     def premcloop(self):
 
@@ -49,6 +43,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.cell_width  = pcr.clone().cellSize()
         # - cell area (m2)
         self.cell_area   = self.cell_length * self.cell_width
+
+        # digital elevation model (m)
+        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
 
     def initial(self):
 
@@ -185,6 +182,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         
         # run modflow
+        # - go to the output folder before executing MODFLOW
+        os.chdir(self.output_folder)
         # - execute the MODFLOW run and write all modflow temporary files to a certain folder
         temporary_folder = self.sampleNumbers()
         self.modflow_object.run(temporary_folder)
