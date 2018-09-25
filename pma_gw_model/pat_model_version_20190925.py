@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 #~ from pcraster import *
 from pcraster.framework import *
 
@@ -46,6 +48,14 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # digital elevation model (m)
         self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
+        
+        # read/generate some lists for perturbing model parameter values
+        # TODO
+        
+        # read tide
+        file_tide = open("input_files/tide_setup_modflowtime_egmond.txt", "r")
+        self.time_and_tide = file_tide.readlines()
+        file_tide.close
         
     def initial(self):
 
@@ -105,8 +115,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - primary and secondary storage coefficients 
         self.primary_storage_coefficient   = self.sand_porosity
         self.secondary_storage_coefficient = self.primary_storage_coefficient  
-        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
-        
+        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used      
 
         # parameter values for the SOLVER package 
         self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50

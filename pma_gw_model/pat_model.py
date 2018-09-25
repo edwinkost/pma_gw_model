@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 
 #~ from pcraster import *
 from pcraster.framework import *
@@ -50,12 +49,23 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # digital elevation model (m)
         self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
         
-        # TODO: add default parameter values (before perturbation)
+        # read/generate some lists for perturbing model parameter values
+        # TODO
+        
+        # read tide
+        file_tide = open("input_files/tide_setup_modflowtime_egmond.txt", "r")
+        self.time_and_tide = file_tide.readlines()
+        file_tide.close*(
+        
+        print self.time_and_tide[0]
+        print self.time_and_tide[1]
+        
         
     def initial(self):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
 
+        
         # defining the layer (one layer model), thickness (m), top and bottom elevations 
         self.thickness = 15.0
         # - thickness value is suggested by Kim Cohen (put reference here)
@@ -96,7 +106,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
         if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
-        # - TODO: Convert this to 
         #
         # - horizontal and vertical conductivity
         self.hConductivity = self.sand_conductivity 
@@ -110,8 +119,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - primary and secondary storage coefficients 
         self.primary_storage_coefficient   = self.sand_porosity
         self.secondary_storage_coefficient = self.primary_storage_coefficient  
-        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used
-        
+        # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used      
 
         # parameter values for the SOLVER package 
         self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
@@ -196,12 +204,11 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - go to the output folder before executing MODFLOW
         os.chdir(self.output_folder)
         # - execute the MODFLOW run and write all modflow temporary files to a certain folder
-        temporary_folder = str(self.currentSampleNumber()) + "/modflow_tmp/"
+        temporary_folder = str(self.currentSampleNumber())
         try:
             os.makedirs(temporary_folder)
         except:
-			cmd = 'rm -r ' + self.output_folder + "/*"
-			os.system(cmd)
+            pass
         self.modflow_object.run(temporary_folder)
         
         # get the output
@@ -209,10 +216,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.groundwater_head = self.modflow_object.getHeads(1)
         self.report(self.groundwater_head, "h")
         
-        # report to netcdf files
-        
         # set the calculate head for the next time step
-        self.initial_head = self.grsoundwater_head
+        self.initial_head = self.groundwater_head
 
 
     def postmcloop(self):
