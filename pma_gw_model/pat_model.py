@@ -178,7 +178,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #
         
         print self.currentTimeStep()
-        print self.time_and_tide[int(self.currentTimeStep)]
+        print self.time_and_tide[int(str(self.currentTimeStep))]
         
         
         # TODO: Read this from the file
