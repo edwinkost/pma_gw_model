@@ -57,11 +57,6 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.time_and_tide = file_tide.readlines()
         file_tide.close()
         
-        print self.time_and_tide[0].split()[1]
-        print self.time_and_tide[1].split()[1]
-        
-        pietje
-        
         
     def initial(self):
 
@@ -104,10 +99,14 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         #
-        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(0.01))
-        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
-        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
-        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
+        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
+        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.0))
+        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(1.0))
+        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(0.1))
+        if self.currentSampleNumber() == 5: self.sand_conductivity = pcr.spatial(pcr.scalar(.01))
+        if self.currentSampleNumber() == 6: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
+        if self.currentSampleNumber() == 7: self.sand_conductivity = pcr.spatial(pcr.scalar(15.))
+        if self.currentSampleNumber() == 8: self.sand_conductivity = pcr.spatial(pcr.scalar(5.0))
         #
         # - horizontal and vertical conductivity
         self.hConductivity = self.sand_conductivity 
@@ -179,7 +178,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         print(self.tide_water_level)
         #
         # TODO: Read this from the file
-        
+        self.tide_water_level = 0.5 * (self.time_and_tide.split()[self.currentTimeStep()-1] + self.time_and_tide.split()[self.currentTimeStep])
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
         #~ self.initial_head = pcr.ifthenelse(pcr.scalar(self.ibound) > 0, self.initial_head, self.tide_water_level)
