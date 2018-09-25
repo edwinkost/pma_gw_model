@@ -57,8 +57,10 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.time_and_tide = file_tide.readlines()
         file_tide.close()
         
-        print self.time_and_tide[0]
-        print self.time_and_tide[1]
+        print self.time_and_tide[0].split()[1]
+        print self.time_and_tide[1].split()[1]
+        
+        pietje
         
         
     def initial(self):
