@@ -184,7 +184,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #
         
         # TODO: Read this from the file
-        self.tide_water_level = 0.5 * (self.time_and_tide[int(self.currentTimeStep)-1].split()[1] + self.time_and_tide[int(self.currentTimeStep)].split()[1])
+        self.tide_water_level = 0.5 * (self.time_and_tide[self.time_step_index-1].split()[1] + self.time_and_tide[self.time_step_index].split()[1])
         print(self.tide_water_level)
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
