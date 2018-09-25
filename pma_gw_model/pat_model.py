@@ -178,8 +178,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         #
         
         print self.currentTimeStep()
+        print self.time_and_tide[int(self.currentTimeStep)]
         
-        pietje
         
         # TODO: Read this from the file
         self.tide_water_level = 0.5 * (self.time_and_tide[int(self.currentTimeStep)()-1].split()[1] + self.time_and_tide[int(self.currentTimeStep)].split()[1])
