@@ -55,7 +55,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         # read tide
         file_tide = open("input_files/tide_setup_modflowtime_egmond.txt", "r")
         self.time_and_tide = file_tide.readlines()
-        file_tide.close*(
+        file_tide.close()
         
         print self.time_and_tide[0]
         print self.time_and_tide[1]
