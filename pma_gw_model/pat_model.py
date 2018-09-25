@@ -175,10 +175,10 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         tide_periode_in_hour = 12.4       # hour
         tide_periode_in_day  = 12.4 / 24. # day
         self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
-        print(self.tide_water_level)
         #
         # TODO: Read this from the file
-        self.tide_water_level = 0.5 * (self.time_and_tide.split()[self.currentTimeStep()-1] + self.time_and_tide.split()[self.currentTimeStep])
+        self.tide_water_level = 0.5 * (self.time_and_tide[self.currentTimeStep()-1].split()[1] + self.time_and_tide[self.currentTimeStep].split()[1])
+        print(self.tide_water_level)
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
         #~ self.initial_head = pcr.ifthenelse(pcr.scalar(self.ibound) > 0, self.initial_head, self.tide_water_level)
