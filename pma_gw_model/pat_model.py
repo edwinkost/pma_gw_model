@@ -131,6 +131,9 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.RELAX  = 1.00               # relaxation parameter used with NPCOND = 1
         self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
+        
+        # starting time step index
+        self.time_step_index = 0
 
         
     def dynamic(self):
@@ -139,7 +142,10 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
 
         # timestep in day unit
         # - a stress period contains a time step (10 minute length)
-        self.timestep_in_day  = self.currentTimeStep() * self.length_of_stress_period
+        self.timestep_in_day = self.currentTimeStep() * self.length_of_stress_period
+        
+        # time step index
+        self.time_step_index = self.time_step_index + 1
         
 
         # initialize modflow object - this object is unique for each sample and also changing over time
@@ -177,12 +183,8 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
         #
         
-        print self.currentTimeStep()
-        print self.time_and_tide[int(str(self.currentTimeStep))]
-        
-        
         # TODO: Read this from the file
-        self.tide_water_level = 0.5 * (self.time_and_tide[int(self.currentTimeStep)()-1].split()[1] + self.time_and_tide[int(self.currentTimeStep)].split()[1])
+        self.tide_water_level = 0.5 * (self.time_and_tide[int(self.currentTimeStep)-1].split()[1] + self.time_and_tide[int(self.currentTimeStep)].split()[1])
         print(self.tide_water_level)
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
