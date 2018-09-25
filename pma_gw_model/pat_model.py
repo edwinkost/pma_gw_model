@@ -180,11 +180,11 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         tide_amplitude       = 1.0        # meter
         tide_periode_in_hour = 12.4       # hour
         tide_periode_in_day  = 12.4 / 24. # day
-        self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
+        #~ self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
         #
         
-        print self.time_and_tide[self.time_step_index-1].split()[1]
-        print self.time_and_tide[self.time_step_index].split()[1]
+        #~ print self.time_and_tide[self.time_step_index-1].split()[1]
+        #~ print self.time_and_tide[self.time_step_index].split()[1]
         
         # TODO: Read this from the file
         self.tide_water_level = 0.5 * (float(self.time_and_tide[self.time_step_index-1].split()[1]) + float(self.time_and_tide[self.time_step_index].split()[1]))
@@ -241,6 +241,7 @@ class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
         percentiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         mcpercentiles(names, percentiles, self.sampleNumbers(), self.timeSteps())
 
+# 
 
 myModel = PantaiAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=4000, firstTimestep=1)
