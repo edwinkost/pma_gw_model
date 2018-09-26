@@ -145,9 +145,6 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
         
-        # starting time step index
-        self.time_step_index = 0
-        
         # TODO: Save all model paramters to a txt file. 
 
         
@@ -161,12 +158,12 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         print(msg)
 
 
+        # time step index (from pcraster)
+        self.time_step_index = self.currentTimeStep()
+
         # timestep in day unit
         # - a stress period contains a time step (10 minute length)
         self.timestep_in_day = self.currentTimeStep() * self.length_of_stress_period
-        
-        # time step index
-        self.time_step_index = self.time_step_index + 1
         
 
         # initialize modflow object - this object is unique for each sample and also changing over time
