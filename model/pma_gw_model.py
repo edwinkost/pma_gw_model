@@ -66,7 +66,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
 
         msg  = "\n" 
-        msg += "Sample number: " + self.currentSampleNumber() 
+        msg += "Sample number: " + str(self.currentSampleNumber()) 
         msg += "\n" 
         print(msg)
         
@@ -156,7 +156,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # In this part (dynamic), the parameters/variables/objects are changing over time.  
 
         msg  = "\n" 
-        msg += "Sample number: " + self.currentSampleNumber()  + " ; " + "time step number: " + self.currentTimeStep()
+        msg += "Sample number: " + str(self.currentSampleNumber())  + " ; " + "time step number: " + str(self.currentTimeStep())
         msg += "\n" 
         print(msg)
 
