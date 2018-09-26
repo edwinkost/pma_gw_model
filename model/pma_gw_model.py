@@ -59,7 +59,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         file_tide.close()
         
         # TODO: Define the number of timesteps based on your the tide file. 
-        
+        # TODO: Extent the tide file to the back so that model runs include some spin ups. 
         
     def initial(self):
 
