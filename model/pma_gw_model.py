@@ -65,6 +65,10 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
 
+        msg  = "\n" 
+        msg += "Sample number: " + self.currentSampleNumber() 
+        msg += "\n" 
+        print(msg)
         
         # defining the layer (one layer model), thickness (m), top and bottom elevations 
         self.thickness = 15.0
@@ -151,6 +155,12 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
         # In this part (dynamic), the parameters/variables/objects are changing over time.  
 
+        msg  = "\n" 
+        msg += "Sample number: " + self.currentSampleNumber()  + " ; " + "time step number: " + self.currentTimeStep()
+        msg += "\n" 
+        print(msg)
+
+
         # timestep in day unit
         # - a stress period contains a time step (10 minute length)
         self.timestep_in_day = self.currentTimeStep() * self.length_of_stress_period
@@ -187,21 +197,18 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # set SOLVER package 
         self.modflow_object.setPCG(self.MXITER, self.ITERI, self.NPCOND, self.HCLOSE, self.RCLOSE, self.RELAX, self.NBPOL, self.DAMP)
 
-        # tide water level (m, relative to MSL) - assume a simple sinusoidal function
-        tide_amplitude       = 1.0        # meter
-        tide_periode_in_hour = 12.4       # hour
-        tide_periode_in_day  = 12.4 / 24. # day
+        #~ # tide water level (m, relative to MSL) - assume a simple sinusoidal function
+        #~ tide_amplitude       = 1.0        # meter
+        #~ tide_periode_in_hour = 12.4       # hour
+        #~ tide_periode_in_day  = 12.4 / 24. # day
         #~ self.tide_water_level = tide_amplitude * np.sin( (2.0 * np.pi * self.timestep_in_day / (tide_periode_in_day )) )
         #
         
-        #~ print self.time_and_tide[self.time_step_index-1].split()[1]
-        #~ print self.time_and_tide[self.time_step_index].split()[1]
-        
-        # TODO: Read this from the file
+        # tide water level from the file (m, relative to MSL???)
         self.tide_water_level = 0.5 * (float(self.time_and_tide[self.time_step_index-1].split()[1]) + float(self.time_and_tide[self.time_step_index].split()[1]))
-        print(self.tide_water_level)
 
-        #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED
+
+        #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED (all cells are active)
         #~ self.initial_head = pcr.ifthenelse(pcr.scalar(self.ibound) > 0, self.initial_head, self.tide_water_level)
 
 
