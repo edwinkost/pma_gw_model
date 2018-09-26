@@ -10,7 +10,7 @@ import pcraster as pcr
 import numpy as np
 
 
-class PantaiAirTanahModel(DynamicModel, MonteCarloModel):
+class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
     def __init__(self):
 
