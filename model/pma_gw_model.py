@@ -261,7 +261,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 # TODO: Define the number of samples based on the pertubation file (which should be defined here as well).  
 # TODO: Define your output folder here. 
 
-myModel = PantaiAirTanahModel()
+myModel = PantaiMukaAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
 mcModel.setForkSamples(fork = True, nrCPUs=4)
