@@ -140,9 +140,6 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
         #~ pcr.aguila(self.ibound)
         
-        # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        # - for the first test, use the DEM as initial head
-        self.initial_head = self.input_dem
         
         # parameter values for the SOLVER package 
         self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
@@ -154,6 +151,16 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
         
+
+
+        # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
+        #~ # - for the first test, use the DEM as initial head
+        #~ self.initial_head = self.input_dem
+        # - alternative: assume a certain value (e.g. MSL)
+        self.initial_head = pcr.spatial(pcr.scalar(0.0))
+        #
+        # TODO: Introduce some spinning up.
+
         
     def dynamic(self):
 
