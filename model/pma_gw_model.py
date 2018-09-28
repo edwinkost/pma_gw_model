@@ -250,15 +250,17 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
     def postmcloop(self):
         
-        print("Get some statistics.")
-        
-        # - go to the output folder before doing some statistics
-        os.chdir(self.output_folder)
-
-        names = ["h"]
-        mcaveragevariance(names, self.sampleNumbers(), self.timeSteps())
-        percentiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        mcpercentiles(names, percentiles, self.sampleNumbers(), self.timeSteps())
+        if len(self.sampleNumbers()) > 1:
+            
+            print("Get some statistics.")
+            
+            # - go to the output folder before doing some statistics
+            os.chdir(self.output_folder)
+            
+            names = ["h"]
+            mcaveragevariance(names, self.sampleNumbers(), self.timeSteps())
+            percentiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+            mcpercentiles(names, percentiles, self.sampleNumbers(), self.timeSteps())
 
 
 # TODO: Define the file "tide" (so that we know the number of time steps).
@@ -267,9 +269,13 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
 myModel = PantaiMukaAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
-mcModel.setForkSamples(fork = True, nrCPUs=4)
+
+# define the number of samples here
+#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
+mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
+
+#~ # - forking only work for linux
+#~ mcModel.setForkSamples(fork = True, nrCPUs=4)
+
+#
 mcModel.run()
-
-
-
