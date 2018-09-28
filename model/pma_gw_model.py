@@ -289,11 +289,11 @@ myModel = PantaiMukaAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
 
 # define the number of samples here
-#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
+mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
+#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
 
-#~ # - forking only work for linux
-#~ mcModel.setForkSamples(fork = True, nrCPUs=4)
+# - forking only work for linux
+mcModel.setForkSamples(fork = True, nrCPUs=4)
 
 #
 mcModel.run()
