@@ -293,7 +293,7 @@ mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
 #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
 
 # - forking only work for linux
-mcModel.setForkSamples(fork = True, nrCPUs=4)
+mcModel.setForkSamples(fork = True, nrCPUs=8)
 
 #
 mcModel.run()
