@@ -71,38 +71,6 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         msg += "\n" 
         print(msg)
         
-        # defining the layer (one layer model), thickness (m), top and bottom elevations 
-        self.thickness = 15.0
-        # - thickness value is suggested by Kim Cohen (put reference here)
-        self.top_elevation    = self.input_dem
-        self.bottom_elevation = self.top_elevation - self.thickness
-
-        # DIS parameters, see http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/dis.html
-        #  - time and spatial units
-        self.ITMUNI = 4 # indicating that the time unit is "days"
-        self.LENUNI = 2 # indicating that the spatial unit is "meters"
-        # - PERLEN: duration of stress period (days)
-        # -- 10 minute stress period = 600 seconds stress period 
-        self.length_of_stress_period = 600. / (24.*60.*60.)  
-        self.PERLEN = self.length_of_stress_period 
-        # - NSTP: number of sub time steps within the PERLEN
-        self.NSTP = 1  
-        # - TSMULT # always 1 by default
-        self.TSMULT = 1
-        # - SSTR: transient (0) or steady state (1)
-        self.SSTR = 0
-        
-        # values for the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        # - Alternative 1: all cells are active 
-        self.ibound = pcr.spatial(pcr.nominal(1.))
-        #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
-        #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
-        #~ pcr.aguila(self.ibound)
-        
-        # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        # - for the first test, use the DEM as initial head
-        self.initial_head = self.input_dem
-        
         # conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
         # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
@@ -136,6 +104,46 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.secondary_storage_coefficient = self.primary_storage_coefficient  
         # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used      
 
+
+        # TODO: Save all model parameter values to a txt file. 
+
+
+        
+        # The following are CURRENTLY just the same for all samples. 
+        ############################################################################
+        
+        # defining the layer (one layer model), thickness (m), top and bottom elevations 
+        self.thickness = 15.0
+        # - thickness value is suggested by Kim Cohen (put reference here)
+        self.top_elevation    = self.input_dem
+        self.bottom_elevation = self.top_elevation - self.thickness
+
+        # DIS parameters, see http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/dis.html
+        #  - time and spatial units
+        self.ITMUNI = 4 # indicating that the time unit is "days"
+        self.LENUNI = 2 # indicating that the spatial unit is "meters"
+        # - PERLEN: duration of stress period (days)
+        # -- 10 minute stress period = 600 seconds stress period 
+        self.length_of_stress_period = 600. / (24.*60.*60.)  
+        self.PERLEN = self.length_of_stress_period 
+        # - NSTP: number of sub time steps within the PERLEN
+        self.NSTP = 1  
+        # - TSMULT # always 1 by default
+        self.TSMULT = 1
+        # - SSTR: transient (0) or steady state (1)
+        self.SSTR = 0
+        
+        # values for the IBOND of the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
+        # - Alternative 1: all cells are active 
+        self.ibound = pcr.spatial(pcr.nominal(1.))
+        #~ # - Alternative 2: in the ocean region (x < -75 m), assume the heads will follow the tides 
+        #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
+        #~ pcr.aguila(self.ibound)
+        
+        # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
+        # - for the first test, use the DEM as initial head
+        self.initial_head = self.input_dem
+        
         # parameter values for the SOLVER package 
         self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
         self.ITERI  = 30                 # number of inner iterations                   # Deltares use 30
@@ -146,8 +154,6 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.NBPOL  = 2                  # indicates whether the estimate of the upper bound on the maximum eigenvalue is 2.0 (but we don ot use it, since NPCOND = 1) 
         self.DAMP   = 1                  # no damping (DAMP introduced in MODFLOW 2000)
         
-        # TODO: Save all model paramters to a txt file. 
-
         
     def dynamic(self):
 
@@ -203,6 +209,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #
         
         # tide water level from the file (m, relative to MSL???)
+        # - average from two measurements
         self.tide_water_level = 0.5 * (float(self.time_and_tide[self.time_step_index-1].split()[1]) + float(self.time_and_tide[self.time_step_index].split()[1]))
 
 
@@ -218,7 +225,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.bed_conductance = None
         # -- assume very thin river bed thickness (m)
         bed_thickness = 0.001
-        self.bed_conductance = self.sand_porosity * self.cell_area / bed_thickness
+        self.bed_conductance = self.sand_conductivity * self.cell_area / bed_thickness
         # - conductance for the RIVER package (m2.day-1)
         self.tide_water_level_entering_the_land = pcr.ifthenelse(self.bottom_morphology < self.tide_water_level, self.tide_water_level, self.bottom_morphology)
         # - inactive the RIV package for dry areas
@@ -247,6 +254,9 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.initial_head = self.groundwater_head
         
         # TODO: Save netcdf files. 
+        
+        # TODO: Save time series for some points.
+        
 
 
     def postmcloop(self):
