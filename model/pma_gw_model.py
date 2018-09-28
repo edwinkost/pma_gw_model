@@ -28,6 +28,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # SET YOUR OUTPUT FOLDER HERE 
         self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
+        #~ self.output_folder = 'D:\\test\'
         
         # create output folder
         cleaning_previous_output_folder = True
