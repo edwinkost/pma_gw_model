@@ -27,8 +27,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.landmask = pcr.readmap(self.clone_map)
         
         # SET YOUR OUTPUT FOLDER HERE 
-        self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
-        #~ self.output_folder = 'D:\\test\'
+        #~ self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
+        self.output_folder = "C:/test/"
         
         # create output folder
         cleaning_previous_output_folder = True
@@ -36,8 +36,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             os.makedirs(self.output_folder)
         except:
             if cleaning_previous_output_folder: 
-			    cmd = 'rm -r ' + self.output_folder + "/*"
-			    os.system(cmd)
+              cmd = 'rm -r ' + self.output_folder + "/*"
+              os.system(cmd)
         
     def premcloop(self):
 
