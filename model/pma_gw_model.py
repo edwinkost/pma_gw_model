@@ -27,8 +27,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.landmask = pcr.readmap(self.clone_map)
         
         # SET YOUR OUTPUT FOLDER HERE 
-        #~ self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
-        self.output_folder = "C:/test/"
+        self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
+        #~ self.output_folder = "C:/test/"
         
         # create output folder
         cleaning_previous_output_folder = True
@@ -76,14 +76,15 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
         #
         if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
-        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.0))
-        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(1.0))
-        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(0.1))
-        if self.currentSampleNumber() == 5: self.sand_conductivity = pcr.spatial(pcr.scalar(.01))
-        if self.currentSampleNumber() == 6: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
-        if self.currentSampleNumber() == 7: self.sand_conductivity = pcr.spatial(pcr.scalar(15.))
-        if self.currentSampleNumber() == 8: self.sand_conductivity = pcr.spatial(pcr.scalar(5.0))
-        if self.currentSampleNumber() == 9: self.sand_conductivity = pcr.spatial(pcr.scalar(25.))
+        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(.05))
+        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(0.1))
+        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(0.5))
+        if self.currentSampleNumber() == 5: self.sand_conductivity = pcr.spatial(pcr.scalar(1.0))
+        if self.currentSampleNumber() == 6: self.sand_conductivity = pcr.spatial(pcr.scalar(2.5))
+        if self.currentSampleNumber() == 7: self.sand_conductivity = pcr.spatial(pcr.scalar(5.0))
+        if self.currentSampleNumber() == 8: self.sand_conductivity = pcr.spatial(pcr.scalar(15.))
+        if self.currentSampleNumber() == 9: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
+
         #
         # - horizontal and vertical conductivity
         self.hConductivity = self.sand_conductivity 
@@ -95,9 +96,15 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - sand porosity (m3.m-3)       # TODO: Find the value from Sebastian paper.
         self.sand_porosity = pcr.spatial(pcr.scalar(0.25))
         #
-        if self.currentSampleNumber() == 10: self.sand_porosity = pcr.spatial(pcr.scalar(0.15))
-        if self.currentSampleNumber() == 11: self.sand_porosity = pcr.spatial(pcr.scalar(0.35))
-        if self.currentSampleNumber() == 12: self.sand_porosity = pcr.spatial(pcr.scalar(0.45))
+        if self.currentSampleNumber() == 10: self.sand_porosity = pcr.spatial(pcr.scalar(0.05))
+        if self.currentSampleNumber() == 11: self.sand_porosity = pcr.spatial(pcr.scalar(0.10))
+        if self.currentSampleNumber() == 12: self.sand_porosity = pcr.spatial(pcr.scalar(0.15))
+        if self.currentSampleNumber() == 13: self.sand_porosity = pcr.spatial(pcr.scalar(0.20))
+        if self.currentSampleNumber() == 14: self.sand_porosity = pcr.spatial(pcr.scalar(0.30))
+        if self.currentSampleNumber() == 15: self.sand_porosity = pcr.spatial(pcr.scalar(0.35))
+        if self.currentSampleNumber() == 16: self.sand_porosity = pcr.spatial(pcr.scalar(0.40))
+        if self.currentSampleNumber() == 17: self.sand_porosity = pcr.spatial(pcr.scalar(0.45))
+        if self.currentSampleNumber() == 18: self.sand_porosity = pcr.spatial(pcr.scalar(0.50))
         #
         # - primary and secondary storage coefficients 
         self.primary_storage_coefficient   = self.sand_porosity
@@ -289,11 +296,11 @@ myModel = PantaiMukaAirTanahModel()
 dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
 
 # define the number of samples here
-#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
+mcModel = MonteCarloFramework(dynamicModel, nrSamples=18)
+#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
 
-#~ # - forking only work for linux
-#~ mcModel.setForkSamples(fork = True, nrCPUs=8)
+# - forking only work for linux
+mcModel.setForkSamples(fork = True, nrCPUs=20)
 
 #
 mcModel.run()
