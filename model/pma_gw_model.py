@@ -325,7 +325,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 # TODO: Define your output folder here. 
 
 myModel = PantaiMukaAirTanahModel()
-dynamicModel = DynamicFramework(myModel, lastTimeStep=55, firstTimestep=1)
+dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
 
 # define the number of samples here
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=18)
