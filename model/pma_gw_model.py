@@ -177,7 +177,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # initialise timeoutput object for reporting time series in txt files
         # - groundwater head
         self.head_obs_point  = pcr.readmap("input_files/groundwater_well_coordinates_dummy.map")
-        self.reportGwHeadTss = TimeoutputTimeseries("groundwater_head", "input_files/groundwater_well_coordinates_dummy.map", noHeader=False)
+        self.reportGwHeadTss = TimeoutputTimeseries("groundwater_head", self, "input_files/groundwater_well_coordinates_dummy.map", noHeader=False)
 
         
     def dynamic(self):
