@@ -252,24 +252,31 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - go to the output folder before executing MODFLOW
         os.chdir(self.output_folder)
         # - execute the MODFLOW run and write all modflow temporary files to a certain folder
-        temporary_folder = str(self.currentSampleNumber())
         try:
+            temporary_folder = str(self.currentSampleNumber())
             os.makedirs(temporary_folder)
         except:
             pass
         try:
+            # new pcraster
             self.modflow_object.run(temporary_folder)
         except:
+            # old pcraster
             os.chdir(temporary_folder)
             self.modflow_object.run()
-        
 
         # get the output
         # - groundwater head (m)
         self.groundwater_head = self.modflow_object.getHeads(1)
-        os.chdir(self.output_folder)
-        self.report(self.groundwater_head, "h")
+        try:
+            # new pcraster
+            self.report(self.groundwater_head, "h")
+        except:
+            # old pcraster
+            os.chdir(self.output_folder)
+            self.report(self.groundwater_head, "h")
         
+
         # set the calculate head for the next time step
         self.initial_head = self.groundwater_head
         
