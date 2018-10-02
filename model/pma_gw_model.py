@@ -257,8 +257,13 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             os.makedirs(temporary_folder)
         except:
             pass
-        self.modflow_object.run(temporary_folder)
+        try:
+            self.modflow_object.run(temporary_folder)
+        except:
+            os.chdir(temporary_folder)
+            self.modflow_object.run()
         
+
         # get the output
         # - groundwater head (m)
         self.groundwater_head = self.modflow_object.getHeads(1)
@@ -271,6 +276,9 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # TODO: Save time series for some points.
         
+        
+        # make sure that you return to the output folder
+        os.chdir(self.output_folder)
 
 
     def postmcloop(self):
