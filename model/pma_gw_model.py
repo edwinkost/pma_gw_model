@@ -27,8 +27,14 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.landmask = pcr.readmap(self.clone_map)
         
         # SET YOUR OUTPUT FOLDER HERE 
+        #~ # - cartesius
+        self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_old_pcraster/"
         self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_new_pcraster/"
+        #~ # - speedy
+        self.output_folder = "/scratch/edwin/test_output_yvonne/test_using_new_pcraster/"
+        #~ # - windows
         #~ self.output_folder = "C:/test/"
+        
         
         # create output folder
         cleaning_previous_output_folder = True
