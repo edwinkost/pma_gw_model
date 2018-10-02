@@ -31,7 +31,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_old_pcraster/"
         self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_new_pcraster/"
         #~ # - speedy
-        self.output_folder = "/scratch/edwin/test_output_yvonne/test_using_new_pcraster/"
+        self.output_folder = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
         #~ # - windows
         #~ self.output_folder = "C:/test/"
         
