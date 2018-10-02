@@ -28,13 +28,13 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # SET YOUR OUTPUT FOLDER HERE 
         #~ # - cartesius
-        self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_old_pcraster/"
-        self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_new_pcraster/"
-        #~ # - speedy
-        self.output_folder = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
+        #~ self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_old_pcraster/"
+        #~ self.output_folder = "/scratch-shared/edwinhs/test_output_yvonne/test_using_new_pcraster/"
+        self.output_folder    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
+        # - speedy
+        #~ self.output_folder = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
         #~ # - windows
         #~ self.output_folder = "C:/test/"
-        
         
         # create output folder
         cleaning_previous_output_folder = True
@@ -44,6 +44,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             if cleaning_previous_output_folder: 
               cmd = 'rm -r ' + self.output_folder + "/*"
               os.system(cmd)
+
         
     def premcloop(self):
 
@@ -167,12 +168,16 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
 
         # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        #~ # - for the first test, use the DEM as initial head
-        #~ self.initial_head = self.input_dem
-        # - alternative: assume a certain value (e.g. MSL)
-        self.initial_head = pcr.spatial(pcr.scalar(0.0))
+        # - Gerben recommends to start using 0.8 m
+        self.initial_head = pcr.spatial(pcr.scalar(0.8))
         #
-        # TODO: Introduce some spinning up.
+        # TODO: Introduce some spinning up. Yvonne will extend the tide data to the past
+        
+        
+        # initialise timeoutput object for reporting time series in txt files
+        # - groundwater head
+        self.head_obs_point  = pcr.readmap("input_files/groundwater_well_coordinates_dummy.map")
+        self.reportGwHeadTss = TimeoutputTimeseries("runoff", self, self.head_obs_point, noHeader=False)
 
         
     def dynamic(self):
@@ -288,9 +293,12 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # set the calculate head for the next time step
         self.initial_head = self.groundwater_head
         
+        
         # TODO: Save netcdf files. 
         
-        # TODO: Save time series for some points.
+        
+        # sampling timeseries for given locations
+        self.reportGwHeadTss.sample(self.groundwater_head)
         
         
         # make sure that you return to the output folder
