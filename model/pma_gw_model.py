@@ -267,6 +267,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # get the output
         # - groundwater head (m)
         self.groundwater_head = self.modflow_object.getHeads(1)
+        os.chdir(self.output_folder)
         self.report(self.groundwater_head, "h")
         
         # set the calculate head for the next time step
