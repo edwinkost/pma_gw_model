@@ -264,6 +264,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             # old pcraster
             os.chdir(temporary_folder)
             self.modflow_object.run()
+            pass
 
         # get the output
         # - groundwater head (m)
@@ -275,6 +276,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             # old pcraster
             os.chdir(self.output_folder)
             self.report(self.groundwater_head, "h")
+            pass
         
 
         # set the calculate head for the next time step
