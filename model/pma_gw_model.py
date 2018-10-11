@@ -21,7 +21,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         MonteCarloModel.__init__(self)
         
         # set the clone map based on DEM
-        self.clone_map = "input_files/DEM_150929_110004_correct.map"
+        self.clone_map = "input_files/DEM_150929_110004_Jarkus_NEW.map"
         pcr.setclone(self.clone_map)
         #~ # - landmask - needed if we want to mask out some areas/cells
         #~ self.landmask = pcr.readmap(self.clone_map)
@@ -57,12 +57,12 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.cell_area   = self.cell_length * self.cell_width
 
         # digital elevation model (m)
-        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
+        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_Jarkus_NEW.map")
         
         # TODO: read/generate some lists for perturbing model parameter values
         
         # read the tide file
-        file_tide = open("input_files/tide_setup_modflowtime_egmond.txt", "r")
+        file_tide = open("input_files/tide_setup_modflowtime_egmond_version_2018-10-05.txt", "r")
         self.time_and_tide = file_tide.readlines()
         file_tide.close()
         
@@ -176,8 +176,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # initialise timeoutput object for reporting time series in txt files
         # - groundwater head
-        self.head_obs_point  = pcr.readmap("input_files/groundwater_well_coordinates_dummy.map")
-        self.reportGwHeadTss = TimeoutputTimeseries("groundwater_head", self, "input_files/groundwater_well_coordinates_dummy.map", noHeader=False)
+        self.head_obs_point  = pcr.readmap("input_files/groundwater_well_coordinates.map")
+        self.reportGwHeadTss = TimeoutputTimeseries("groundwater_head", self, self.head_obs_point, noHeader=False)
 
         
     def dynamic(self):
@@ -325,7 +325,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 # TODO: Define your output folder here. 
 
 myModel = PantaiMukaAirTanahModel()
-dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
+dynamicModel = DynamicFramework(myModel, lastTimeStep=7920, firstTimestep=1)
 
 # define the number of samples here
 mcModel = MonteCarloFramework(dynamicModel, nrSamples=18)
