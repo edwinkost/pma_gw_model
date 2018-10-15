@@ -215,7 +215,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # tide water level from the file (m, relative to MSL???)
         # - average from two measurements
-        self.tide_water_level = 0.5 * (float(self.time_and_tide[self.time_step_index-1].split()[1]) + float(self.time_and_tide[self.time_step_index].split()[1]))
+        self.tide_water_level = 0.5 * (float(self.model_setup['tide_series'][self.time_step_index-1].split()[1]) + float(self.model_setup['tide_series'][self.time_step_index].split()[1]))
 
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED (all cells are active)
