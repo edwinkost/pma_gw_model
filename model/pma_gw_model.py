@@ -314,7 +314,7 @@ def main():
         os.makedirs(self.output_folder)
     except:
         if cleaning_previous_output_folder: 
-          cmd = 'rm -r ' + self.output_folder + "/*"
+          cmd = 'rm -r ' + model_setup['output_folder'] + "/*"
           os.system(cmd)
     
     ####################################################################################################
