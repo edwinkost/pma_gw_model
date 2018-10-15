@@ -173,7 +173,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # initiate netcdf files for groundwater head
         netcdf_variable_name  = "groundwater_head"
-        self.netcdf_file_name = self.output_folder + "/" + str(self.currentSampleNumber()) + "/" groundwater_head
+        self.netcdf_file_name = self.output_folder + "/" + str(self.currentSampleNumber()) + "/" + netcdf_variable_name + ".nc"
         self.model_setup['netcdf_attributes']['notes'] = write_line
         self.netcdf_writer.create_netcdf_file(self.netcdf_file_name, self.model_setup['netcdf_attributes'])
         # - create variable
