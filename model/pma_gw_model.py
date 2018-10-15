@@ -356,7 +356,7 @@ def main():
     model_setup['start_datetime'] =  datetime.datetime(int("2015"), int("09"), int("07"), int("00"), int("00"))     
     
     # the number of timesteps based on the length of tide file
-    model_setup['number_of_time_steps'] = len(model_setup['tide_series'])
+    model_setup['number_of_time_steps'] = len(model_setup['tide_series']) - 1
     
     
     # elevation (DEM, in meter)
