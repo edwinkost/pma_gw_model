@@ -13,7 +13,7 @@ from pcraster.framework import *
 import pcraster as pcr
 import numpy as np
 
-import output_netcdf_writer
+#~ import output_netcdf_writer
 
 class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
