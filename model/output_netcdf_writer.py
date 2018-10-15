@@ -33,7 +33,7 @@ class OutputNetCDF():
         self.projection_EPSG_code = 'unknown'
         self.projection_proj4_params = 'unknown'
         self.projection_grid_mapping_name = 'unknown'
-        if projection_info = "longlat":
+        if projection_info == "longlat":
         # - an example for latlon
             self.projection_long_name = 'wgs84'
             self.projection_EPSG_code = 'EPSG:4326'
