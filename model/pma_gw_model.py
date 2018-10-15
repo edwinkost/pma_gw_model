@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+
+import time
+import datetime
 
 #~ from pcraster import *
 from pcraster.framework import *
@@ -9,35 +13,30 @@ from pcraster.framework import *
 import pcraster as pcr
 import numpy as np
 
+#~ import output_netcdf_writer
 
 class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
-    def __init__(self):
+    def __init__(self, model_setup):
 
-        # In this part ("__init__"), we initiate pcraster frameworks and set the clone map and set the output folder. 
+        # In this part ("__init__"), we initiate pcraster frameworks and set the clone map.
         
         # initiate pcraster dynamic and monte carlo frameworks   
         DynamicModel.__init__(self)
         MonteCarloModel.__init__(self)
         
+        # make model_setup available for the entire method
+        self.model_setup = model_setup
+        
         # set the clone map based on DEM
-        self.clone_map = "input_files/DEM_150929_110004_correct.map"
+        self.clone_map = self.model_setup['dem_file_name']
         pcr.setclone(self.clone_map)
-        #~ # - landmask - needed if we want to mask out some areas/cells
-        #~ self.landmask = pcr.readmap(self.clone_map)
+        # - landmask - needed if we want to mask out some areas/cells
+        self.landmask = pcr.defined(pcr.readmap(self.clone_map))
         
-        # SET YOUR OUTPUT FOLDER HERE 
-        #~ self.output_folder = "/scratch-shared/edwinhs/output_yvonne/test/"
-        self.output_folder = "C:/test/"
+        # output folder
+        self.output_folder = self.model_setup['output_folder']
         
-        # create output folder
-        cleaning_previous_output_folder = True
-        try: 
-            os.makedirs(self.output_folder)
-        except:
-            if cleaning_previous_output_folder: 
-              cmd = 'rm -r ' + self.output_folder + "/*"
-              os.system(cmd)
         
     def premcloop(self):
 
@@ -50,17 +49,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.cell_area   = self.cell_length * self.cell_width
 
         # digital elevation model (m)
-        self.input_dem = pcr.readmap("input_files/DEM_150929_110004_correct.map")
+        self.input_dem = pcr.readmap(self.model_setup['dem_file_name'])
         
-        # TODO: read/generate some lists for perturbing model parameter values
-        
-        # read the tide file
-        file_tide = open("input_files/tide_setup_modflowtime_egmond.txt", "r")
-        self.time_and_tide = file_tide.readlines()
-        file_tide.close()
-        
-        # TODO: Define the number of timesteps based on your the tide file. 
-        # TODO: Extent the tide file to the back so that model runs include some spin ups. 
         
     def initial(self):
 
@@ -72,40 +62,24 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         print(msg)
         
         # conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
-        # - sand conductivity in m.day-1 # TODO: Find the value from Sebastian paper. 
-        self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
-        #
-        if self.currentSampleNumber() == 1: self.sand_conductivity = pcr.spatial(pcr.scalar(10.))
-        if self.currentSampleNumber() == 2: self.sand_conductivity = pcr.spatial(pcr.scalar(2.0))
-        if self.currentSampleNumber() == 3: self.sand_conductivity = pcr.spatial(pcr.scalar(1.0))
-        if self.currentSampleNumber() == 4: self.sand_conductivity = pcr.spatial(pcr.scalar(0.1))
-        if self.currentSampleNumber() == 5: self.sand_conductivity = pcr.spatial(pcr.scalar(.01))
-        if self.currentSampleNumber() == 6: self.sand_conductivity = pcr.spatial(pcr.scalar(20.))
-        if self.currentSampleNumber() == 7: self.sand_conductivity = pcr.spatial(pcr.scalar(15.))
-        if self.currentSampleNumber() == 8: self.sand_conductivity = pcr.spatial(pcr.scalar(5.0))
-        if self.currentSampleNumber() == 9: self.sand_conductivity = pcr.spatial(pcr.scalar(25.))
+        inp_soil_conductivity = self.model_setup['soil_conductivity'][int(str(self.currentSampleNumber())) - 1]
+        self.soil_conductivity = pcr.spatial(pcr.scalar(inp_soil_conductivity))
+
         #
         # - horizontal and vertical conductivity
-        self.hConductivity = self.sand_conductivity 
+        self.hConductivity = self.soil_conductivity 
         self.vConductivity = self.hConductivity          
         # - for one layer model, vConductivity is just dummy and never used
         # - layer type, we use LAYTYPE = 0 (harmonic mean) and LAYCON = 0 (confined, constant transmissivities and storage coefficients)
         
         # storage coefficients for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
-        # - sand porosity (m3.m-3)       # TODO: Find the value from Sebastian paper.
+        # - sand porosity (m3.m-3)                                                                                         # TODO: Find the value from Sebastian paper.
         self.sand_porosity = pcr.spatial(pcr.scalar(0.25))
-        #
-        if self.currentSampleNumber() == 10: self.sand_porosity = pcr.spatial(pcr.scalar(0.15))
-        if self.currentSampleNumber() == 11: self.sand_porosity = pcr.spatial(pcr.scalar(0.35))
-        if self.currentSampleNumber() == 12: self.sand_porosity = pcr.spatial(pcr.scalar(0.45))
         #
         # - primary and secondary storage coefficients 
         self.primary_storage_coefficient   = self.sand_porosity
         self.secondary_storage_coefficient = self.primary_storage_coefficient  
         # - for LAYCON = 0 (and 1), secondary_storage_coefficient is just dummy and never used      
-
-
-        # TODO: Save all model parameter values to a txt file. 
 
 
         
@@ -154,12 +128,46 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
 
         # the initial head for the BAS package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bas.html
-        #~ # - for the first test, use the DEM as initial head
-        #~ self.initial_head = self.input_dem
-        # - alternative: assume a certain value (e.g. MSL)
-        self.initial_head = pcr.spatial(pcr.scalar(0.0))
-        #
-        # TODO: Introduce some spinning up.
+        # - Gerben recommends to start using 0.8 m
+        self.initial_head = pcr.spatial(pcr.scalar(0.8))
+        
+
+        # initialise timeoutput object for reporting time series in txt files
+        # - groundwater head
+        self.head_obs_point  = pcr.readmap("input_files/groundwater_well_coordinates.map")
+        self.reportGwHeadTss = TimeoutputTimeseries("groundwater_head", self, self.head_obs_point, noHeader=False)
+
+
+        # Save model parameter values (and other information) to a txt file.
+        # - output directory (that will contain result)
+        output_directory = self.output_folder + "/" + str(self.currentSampleNumber())
+        try:
+            os.makedirs(output_directory)
+        except:
+            pass
+        # - file name for this information
+        information_file = output_directory + "/" + "info.txt"
+        file_info = open(information_file, 'w')
+        write_line  = "" 
+        # - DEM
+        write_line += "DEM (m): " + str(self.model_setup['dem_file_name'])
+        write_line += "\n"
+        # - tide
+        write_line += "Tide input file name: " + str(self.model_setup['tide_file_name'])
+        write_line += "\n"
+        # - starting date
+        write_line += "Starting date and time: " + str(self.model_setup['start_datetime'])
+        write_line += "\n"
+        # - soil conductivity
+        write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
+        write_line += "\n"
+        file_info.write(write_line)
+        # - close the file
+        file_info.close()
+        
+        
+        # TODO: Initiate netcdf reporting HERE.
+          
 
         
     def dynamic(self):
@@ -217,7 +225,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         
         # tide water level from the file (m, relative to MSL???)
         # - average from two measurements
-        self.tide_water_level = 0.5 * (float(self.time_and_tide[self.time_step_index-1].split()[1]) + float(self.time_and_tide[self.time_step_index].split()[1]))
+        self.tide_water_level = 0.5 * (float(self.model_setup['tide_series'][self.time_step_index-1].split()[1]) + float(self.model_setup['tide_series'][self.time_step_index].split()[1]))
 
 
         #~ # - far in the ocean (ibound = -1), groundwater head is equal to the tide - NOT NEEDED (all cells are active)
@@ -232,7 +240,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.bed_conductance = None
         # -- assume very thin river bed thickness (m)
         bed_thickness = 0.001
-        self.bed_conductance = self.sand_conductivity * self.cell_area / bed_thickness
+        self.bed_conductance = self.soil_conductivity * self.cell_area / bed_thickness
         # - conductance for the RIVER package (m2.day-1)
         self.tide_water_level_entering_the_land = pcr.ifthenelse(self.bottom_morphology < self.tide_water_level, self.tide_water_level, self.bottom_morphology)
         # - inactive the RIV package for dry areas
@@ -245,30 +253,53 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - go to the output folder before executing MODFLOW
         os.chdir(self.output_folder)
         # - execute the MODFLOW run and write all modflow temporary files to a certain folder
-        temporary_folder = str(self.currentSampleNumber())
         try:
+            temporary_folder = str(self.currentSampleNumber())
             os.makedirs(temporary_folder)
         except:
             pass
-        self.modflow_object.run(temporary_folder)
-        
+        try:
+            # new pcraster
+            self.modflow_object.run(temporary_folder)
+        except:
+            # old pcraster
+            os.chdir(temporary_folder)
+            self.modflow_object.run()
+            pass
+
         # get the output
         # - groundwater head (m)
         self.groundwater_head = self.modflow_object.getHeads(1)
-        self.report(self.groundwater_head, "h")
+        try:
+            # new pcraster
+            self.report(self.groundwater_head, "h")
+        except:
+            # old pcraster
+            os.chdir(self.output_folder)
+            self.report(self.groundwater_head, "h")
+            pass
         
+
         # set the calculate head for the next time step
         self.initial_head = self.groundwater_head
         
+        
         # TODO: Save netcdf files. 
         
-        # TODO: Save time series for some points.
         
+        # sampling timeseries for given locations
+        self.reportGwHeadTss.sample(self.groundwater_head)
+        
+        
+        # make sure that you return to the output folder
+        os.chdir(self.output_folder)
 
 
     def postmcloop(self):
         
-        if len(self.sampleNumbers()) > 1:
+        calculate_statistics = False
+        
+        if len(self.sampleNumbers()) > 1 and calculate_statistics:
             
             print("Get some statistics.")
             
@@ -281,19 +312,97 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
             mcpercentiles(names, percentiles, self.sampleNumbers(), self.timeSteps())
 
 
-# TODO: Define the file "tide" (so that we know the number of time steps).
-# TODO: Define the number of samples based on the pertubation file (which should be defined here as well).  
-# TODO: Define your output folder here. 
 
-myModel = PantaiMukaAirTanahModel()
-dynamicModel = DynamicFramework(myModel, lastTimeStep=5500, firstTimestep=1)
+def main():
+    
+    # initiate a dictionary that will contain input values (and some other information)  
+    model_setup = {}
+    
 
-# define the number of samples here
-#~ mcModel = MonteCarloFramework(dynamicModel, nrSamples=12)
-mcModel = MonteCarloFramework(dynamicModel, nrSamples=1)
+    # SET YOUR OUTPUT FOLDER HERE 
+    #~ # - cartesius
+    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
+    # - speedy
+    #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
+    #~ # - WINDOWS
+    #~ model_setup['output_folder'] = "C:/test/"
+    
+    # create output folder
+    cleaning_previous_output_folder = True
+    try: 
+        os.makedirs(model_setup['output_folder'])
+    except:
+        if cleaning_previous_output_folder: 
+          cmd = 'rm -r ' + model_setup['output_folder'] + "/*"
+          os.system(cmd)
+    
+    ####################################################################################################
+    
+    
 
-#~ # - forking only work for linux
-#~ mcModel.setForkSamples(fork = True, nrCPUs=8)
+    # INPUT SECTION
+    # - all input file names are RELATIVE to the directory where THIS SCRIPT is stored. 
+    
+    # tide 
+    # - the file should includes some extra data for spinning up purpose.
+    model_setup['tide_file_name'] = "input_files/tide_setup_modflowtime_egmond_version_2018-10-05.txt"
+    # - read the tide file
+    file_tide = open(model_setup['tide_file_name'], "r")
+    # - tide water levels (m) for every 10 minutes (600 seconds)
+    model_setup['tide_series'] = file_tide.readlines()
+    file_tide.close()
 
-#
-mcModel.run()
+    # the starting date of the model run based on tide file (Yvonne: 7 September 2015)                 - TODO: Check the clock/date with Yvonne.
+    model_setup['start_datetime'] =  datetime.datetime(int("2015"), int("09"), int("07"), int("00"), int("00"))     
+    
+    # the number of timesteps based on the length of tide file
+    model_setup['number_of_time_steps'] = len(model_setup['tide_series']) - 1
+    
+    
+    # elevation (DEM, in meter)
+    model_setup['dem_file_name'] = "input_files/DEM_150929_110004_Jarkus_NEW.map"
+    
+    
+    # conductivity values (m.day-1) in a list: value for every sample
+    model_setup['soil_conductivity'] = [10.0,
+                                        0.10,
+                                        0.20,
+                                        0.50,
+                                        1.00,
+                                        2.00,
+                                        5.00,
+                                        15.0,
+                                        20.0,
+                                        50.0]
+    
+    # number of samples
+    # - based on number of conductivity values
+    number_of_samples = len(model_setup['soil_conductivity'])
+    
+
+    # PS: There are also more input files/values that are harcoded in the other parts.   
+
+    
+    ####################################################################################################
+
+
+    # STARTING THE MODEL
+    
+    myModel = PantaiMukaAirTanahModel(model_setup)
+    dynamicModel = DynamicFramework(myModel, lastTimeStep = model_setup['number_of_time_steps'], firstTimestep = 1)
+    
+    # define the number of samples here
+    mcModel = MonteCarloFramework(dynamicModel, nrSamples = number_of_samples)
+    #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
+    
+    # - forking only work for linux
+    mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    
+    #
+    mcModel.run()
+
+        
+if __name__ == '__main__':
+    # print disclaimer
+    sys.exit(main())
+
