@@ -34,6 +34,9 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - landmask - needed if we want to mask out some areas/cells
         self.landmask = pcr.defined(pcr.readmap(self.clone_map))
         
+        # output folder
+        self.output_folder = self.model_setup['output_folder']
+        
         
     def premcloop(self):
 
@@ -312,7 +315,7 @@ def main():
     # create output folder
     cleaning_previous_output_folder = True
     try: 
-        os.makedirs(self.output_folder)
+        os.makedirs(model_setup['output_folder'])
     except:
         if cleaning_previous_output_folder: 
           cmd = 'rm -r ' + model_setup['output_folder'] + "/*"
