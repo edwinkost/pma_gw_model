@@ -140,7 +140,12 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
         # Save model parameter values (and other information) to a txt file.
         # - output directory (that will contain result)
-        output_directory = self.output_folder + "/" + str(self.currentSampleNumber())
+        output_directory = selfl.output_folder + "/" + str(self.currentSampleNumber())
+        try:
+            os.makedirs(output_directory)
+        except:
+            pass
+        # - file name for this information
         information_file = output_directory + "/" + "info.txt"
         file_info = open(information_file, 'w')
         # - soil conductivity
