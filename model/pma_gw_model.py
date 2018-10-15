@@ -150,7 +150,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         file_info = open(information_file, 'w')
         # - soil conductivity
         write_line  = "" 
-        write_line += "Soil conductivity (m.day-1): " + inp_soil_conductivity
+        write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
         write_line  = "\n"
         file_info.write(write_line)
         file_info.close()
