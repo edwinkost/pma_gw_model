@@ -11,7 +11,6 @@ import glob
 import subprocess
 import netCDF4 as nc
 import numpy as np
-import virtualOS as vos
 
 class OutputNetCDF():
     
