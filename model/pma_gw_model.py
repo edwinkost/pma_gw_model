@@ -302,7 +302,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # write netcdf files for groundwater head
         netcdf_variable_name  = "groundwater_head"
         # - time bounds for netcdf files
-        lowerTimeBound = model_setup['start_datetime'] + (self.time_step_index - 1) * datetime.timedelta(days = self.length_of_stress_period)
+        lowerTimeBound = self.model_setup['start_datetime'] + (self.time_step_index - 1) * datetime.timedelta(days = self.length_of_stress_period)
         upperTimeBound = lowerTimeBound + datetime.timedelta(days = self.length_of_stress_period)
         time_bounds = [lowerTimeBound, upperTimeBound]
         field_value = pcr.pcr2numpy(inundation_map, 1e20)
