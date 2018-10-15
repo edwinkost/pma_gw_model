@@ -334,7 +334,7 @@ def main():
     file_tide.close()
 
     # the starting date of the model run based on tide file (Yvonne: 7 September 2015)                 - TODO: Check the clock/date with Yvonne.
-    model_setup['start_datetime'] =  datetime.date(int("2015"), int("09"), int("07"), int("00"), int("00"))     
+    model_setup['start_datetime'] =  datetime.datetime(int("2015"), int("09"), int("07"), int("00"), int("00"))     
     
     # the number of timesteps based on the length of tide file
     model_setup['number_of_time_steps'] = len(model_setup['tide_series'])
@@ -358,7 +358,10 @@ def main():
     
     # number of samples
     # - based on number of conductivity values
-    number_of_samples = len(model_setup['soil_conductivity'])  
+    number_of_samples = len(model_setup['soil_conductivity'])
+    
+
+    # PS: There are also more input files/values that are harcoded in the other parts.   
 
     
     ####################################################################################################
