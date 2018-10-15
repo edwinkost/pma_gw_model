@@ -13,7 +13,7 @@ from pcraster.framework import *
 import pcraster as pcr
 import numpy as np
 
-#~ import output_netcdf_writer
+import output_netcdf_writer
 
 class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
@@ -33,16 +33,19 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         pcr.setclone(self.clone_map)
         # - landmask - needed if we want to mask out some areas/cells
         self.landmask = pcr.defined(pcr.readmap(self.clone_map))
-        
+
         # output folder
         self.output_folder = self.model_setup['output_folder']
         
+        # initiate a netcdf writer
+        self.netcdf_writer = output_netcdf_writer.OutputNetCDF(pcraster_clone = pcr.clone())
         
     def premcloop(self):
 
         # In this part (premcloop), we initiate parameters/variables/objects that are the same (constant) values throughout all monte carlo (MC) samples. 
+        # - Note that you can also write this part in "__init__" (see above). 
 
-        # get the cell dimension from the clone map (length and width, in meter)
+        # get the map properties of the clone map (length and width, in meter)
         self.cell_length = pcr.clone().cellSize()   
         self.cell_width  = pcr.clone().cellSize()
         # - cell area (m2)
@@ -50,7 +53,6 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
 
         # digital elevation model (m)
         self.input_dem = pcr.readmap(self.model_setup['dem_file_name'])
-        
         
     def initial(self):
 
@@ -161,13 +163,23 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - soil conductivity
         write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
         write_line += "\n"
+        # - sample number
+        write_line += "PCRaster sample number: " + str(self.currentSampleNumber())
+        write_line += "\n"
         file_info.write(write_line)
         # - close the file
         file_info.close()
         
         
-        # TODO: Initiate netcdf reporting HERE.
-          
+        # initiate netcdf files for groundwater head
+        netcdf_variable_name  = "groundwater_head"
+        self.netcdf_file_name = self.output_folder + "/" + str(self.currentSampleNumber()) + "/" groundwater_head
+        self.model_setup['netcdf_attributes']['notes'] = write_line
+        self.netcdf_writer.create_netcdf_file(self.netcdf_file_name, self.model_setup['netcdf_attributes'])
+        # - create variable
+        netcdf_variable_unit  = "m"
+        self.netcdf_writer.create_variable(self.netcdf_file_name, netcdf_variable_name, netcdf_variable_unit)   
+
 
         
     def dynamic(self):
@@ -284,12 +296,18 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.initial_head = self.groundwater_head
         
         
-        # TODO: Save netcdf files. 
-        
-        
         # sampling timeseries for given locations
         self.reportGwHeadTss.sample(self.groundwater_head)
         
+        # write netcdf files for groundwater head
+        netcdf_variable_name  = "groundwater_head"
+        # - time bounds for netcdf files
+        lowerTimeBound = model_setup['start_datetime'] + (self.time_step_index - 1) * datetime.timedelta(days = self.length_of_stress_period)
+        upperTimeBound = lowerTimeBound + datetime.timedelta(days = self.length_of_stress_period)
+        time_bounds = [lowerTimeBound, upperTimeBound]
+        field_value = pcr.pcr2numpy(inundation_map, 1e20)
+        self.netcdf_writer.data_to_netcdf(self.netcdf_file_name, netcdf_variable_name, field_value)   
+
         
         # make sure that you return to the output folder
         os.chdir(self.output_folder)
@@ -381,6 +399,19 @@ def main():
     
 
     # PS: There are also more input files/values that are harcoded in the other parts.   
+
+
+    # attribute information for netcdf files
+    model_setup['netcdf_attributes'] = {}
+    model_setup['netcdf_attributes']['institution'] = "Utrecht University, Dept. of Physical Geography"
+    model_setup['netcdf_attributes']['title'      ] = "Groundwater simulation (Egmond aan Zee)"
+    model_setup['netcdf_attributes']['source'     ] = "Model scripts were written by Edwin H. Sutanudjaja (E.H.Sutanudjaja@uu.nl)."
+    model_setup['netcdf_attributes']['references' ] = "Smit et al. (in prep.)"
+    model_setup['netcdf_attributes']['description'] = "Groundwater simulation (Egmond aan Zee)"
+    model_setup['netcdf_attributes']['created by' ] = "The model run was performed by Yvonne Smit (Y.Smit@uu.nl). Model scripts were written by Edwin H. Sutanudjaja (E.H.Sutanudjaja@uu.nl)."
+    model_setup['netcdf_attributes']['notes'      ] = ""
+
+    
 
     
     ####################################################################################################
