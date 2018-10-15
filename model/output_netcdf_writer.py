@@ -163,7 +163,7 @@ class OutputNetCDF():
         print self.zlib
         
         # creating the variable
-        var = rootgrp.createVariable(shortVarName, 'f4', ('time', 'y', 'x',), fill_value, zlib = self.zlib)
+        var = rootgrp.createVariable(shortVarName, 'f4', ('time', 'y', 'x',), fill_value = fill_value, zlib = self.zlib)
         var.standard_name = shortVarName
         var.long_name = longVarName
         var.comment = comment
