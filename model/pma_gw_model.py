@@ -345,16 +345,16 @@ def main():
     
     
     # conductivity values (m.day-1) in a list: value for every sample
-    model_setup['soil_conductivity'] = [10.,
-                                        .05,
-                                        0.1,
-                                        0.5,
-                                        1.0,
-                                        2.5,
-                                        5.0,
-                                        15.,
-                                        20.
-                                        50.]
+    model_setup['soil_conductivity'] = [10.0,
+                                        0.10,
+                                        0.20,
+                                        0.50,
+                                        1.00,
+                                        2.00,
+                                        5.00,
+                                        15.0,
+                                        20.0,
+                                        50.0]
     
     # number of samples
     # - based on number of conductivity values
