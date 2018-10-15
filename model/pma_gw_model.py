@@ -148,11 +148,21 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - file name for this information
         information_file = output_directory + "/" + "info.txt"
         file_info = open(information_file, 'w')
-        # - soil conductivity
         write_line  = "" 
+        # - DEM
+        write_line += "DEM (m): " + str(self.model_setup['dem_file_name'])
+        write_line += "\n"
+        # - tide
+        write_line += "Tide input file name: " + str(self.model_setup['tide_file_name'])
+        write_line += "\n"
+        # - starting date
+        write_line += "Starting date and time: " + str(self.model_setup['start_datetime'])
+        write_line += "\n"
+        # - soil conductivity
         write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
-        write_line  = "\n"
+        write_line += "\n"
         file_info.write(write_line)
+        # - close the file
         file_info.close()
         
         
