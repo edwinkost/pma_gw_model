@@ -59,7 +59,8 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         print(msg)
         
         # conductivities for the BCF package, see: http://pcraster.geo.uu.nl/pcraster/4.1.0/doc/modflow/bcf.html
-        self.soil_conductivity = pcr.spatial(pcr.scalar(self.model_setup['soil_conductivity']))
+        inp_soil_conductivity = self.model_setup['soil_conductivity'][int(str(self.currentSampleNumber())) - 1]
+        self.soil_conductivity = pcr.spatial(pcr.scalar(inp_soil_conductivity))
 
         #
         # - horizontal and vertical conductivity
@@ -141,7 +142,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         file_info = open(information_file, 'w')
         # - soil conductivity
         write_line  = "" 
-        write_line += "Soil conductivity (m.day-1): " + self.model_setup['soil_conductivity']
+        write_line += "Soil conductivity (m.day-1): " + inp_soil_conductivity
         write_line  = "\n"
         file_info.write(write_line)
         file_info.close()
