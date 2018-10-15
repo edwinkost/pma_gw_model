@@ -38,7 +38,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.output_folder = self.model_setup['output_folder']
         
         # initiate a netcdf writer
-        self.netcdf_writer = output_netcdf_writer.OutputNetCDF(pcraster_clone = pcr.clone())
+        self.netcdf_writer = output_netcdf_writer.OutputNetCDF(pcr.clone())
         
     def premcloop(self):
 
