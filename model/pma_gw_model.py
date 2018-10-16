@@ -436,9 +436,10 @@ def main():
     #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
     
     # - forking only work for linux
-    mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    #~ mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    mcModel.setForkSamples(fork = True, nrCPUs = 5)
     
-    #
+    # run
     mcModel.run()
 
         
