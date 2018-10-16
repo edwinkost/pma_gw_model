@@ -345,12 +345,12 @@ def main():
     
 
     # SET YOUR OUTPUT FOLDER HERE 
-    #~ # - cartesius
-    #~ model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
+    # - cartesius
+    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
     #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
-    # - WINDOWS
-    model_setup['output_folder'] = "C:/test/"
+    #~ # - WINDOWS
+    #~ model_setup['output_folder'] = "C:/test/"
     
     # create output folder
     cleaning_previous_output_folder = True
@@ -435,8 +435,8 @@ def main():
     mcModel = MonteCarloFramework(dynamicModel, nrSamples = number_of_samples)
     #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
     
-    #~ # - forking only work for linux
-    #~ mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    # - forking only work for linux
+    mcModel.setForkSamples(fork = True, nrCPUs = 20)
     
     #
     mcModel.run()
