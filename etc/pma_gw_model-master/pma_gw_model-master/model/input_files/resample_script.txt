@@ -1,0 +1,7 @@
+mapattr -s -R 161 -C 201 -B -P yb2t -x -140.5 -y -99.5 -l 1 clone_version_20181016.map
+
+col2map --clone clone_version_20181016.map -S -m mv -x 1 -y 2 -v 3 DEM_150929_110004_Jetski.txt DEM_150929_110004_Jetski.map
+
+aguila DEM_150929_110004_Jetski.map
+
+
