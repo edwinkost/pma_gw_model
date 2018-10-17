@@ -54,8 +54,15 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # digital elevation model (m)
         self.input_dem = pcr.readmap(self.model_setup['dem_file_name'])
         
+        # before entering the initial part, save the current working direcory
+        self.script_directory = os.getcwd()
+        
+        
     def initial(self):
 
+        # make sure that you start from the script directory
+        os.chdir(self.script_directory)
+        
         # In this part (premcloop), we initiate parameters/variables/objects that are changing throughout all monte carlo samples. 
 
         msg  = "\n" 
@@ -338,9 +345,9 @@ def main():
     
 
     # SET YOUR OUTPUT FOLDER HERE 
-    #~ # - cartesius
+    # - cartesius
     model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
-    # - speedy
+    #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
     #~ # - WINDOWS
     #~ model_setup['output_folder'] = "C:/test/"
@@ -375,10 +382,12 @@ def main():
     
     # the number of timesteps based on the length of tide file
     model_setup['number_of_time_steps'] = len(model_setup['tide_series']) - 1
+    #~ # - for testing
+    #~ model_setup['number_of_time_steps'] = 3
     
     
     # elevation (DEM, in meter)
-    model_setup['dem_file_name'] = "input_files/DEM_150929_110004_Jarkus_NEW.map"
+    model_setup['dem_file_name'] = "input_files/DEM_150929_110004_Jetski.map"
     
     
     # conductivity values (m.day-1) in a list: value for every sample
@@ -427,13 +436,13 @@ def main():
     #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
     
     # - forking only work for linux
-    mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    #~ mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    mcModel.setForkSamples(fork = True, nrCPUs = 5)
     
-    #
+    # run
     mcModel.run()
 
         
 if __name__ == '__main__':
-    # print disclaimer
     sys.exit(main())
 
