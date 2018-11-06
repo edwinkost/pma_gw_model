@@ -363,7 +363,7 @@ def main():
 
     # SET YOUR OUTPUT FOLDER HERE 
     # - cartesius
-    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
+    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test_with_regional_head/"
     #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
     #~ # - WINDOWS
@@ -408,16 +408,19 @@ def main():
     
     
     # conductivity values (m.day-1) in a list: value for every sample
-    model_setup['soil_conductivity'] = [10.0,
-                                        0.10,
-                                        0.20,
-                                        0.50,
-                                        1.00,
-                                        2.00,
-                                        5.00,
-                                        15.0,
+    model_setup['soil_conductivity'] = [100.0,
+                                        50.0
+                                        45.0,
+                                        40.0,
+                                        35.0,
+                                        30.0,
+                                        25.0,
                                         20.0,
-                                        50.0]
+                                        15.0,
+                                        10.0,
+                                        5.0,
+                                        2.0,
+                                        1.0]
     
     # number of samples
     # - based on number of conductivity values
