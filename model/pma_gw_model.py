@@ -124,7 +124,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ pcr.aguila(self.ibound)
         
         # ibound with regional groundwater head values
-        if self.model_setup['regional_groundwater_head']['activate']:
+        if self.model_setup['regional_groundwater_head']['activation']:
             self.ibound = pcr.ifthenelse(pcr.xcoordinate(pcr.boolean(1.0)) >= self.model_setup['regional_groundwater_head']['starting_x'], pcr.nominal(-1.), self.ibound)
 
         
@@ -145,7 +145,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         self.initial_head = pcr.spatial(pcr.scalar(0.8))
         
         # regional groundwater head
-        if self.model_setup['regional_groundwater_head']['activate']:
+        if self.model_setup['regional_groundwater_head']['activation']:
             self.initial_head = pcr.ifthenelse(pcr.xcoordinate(pcr.boolean(1.0)) >= self.model_setup['regional_groundwater_head']['starting_x'], self.model_setup['regional_groundwater_head']['value'], self.initial_head)
 
 
@@ -179,7 +179,7 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
         write_line += "\n"
         # - regional groundwater head (optional):
-        if self.model_setup['regional_groundwater_head']['activate']:
+        if self.model_setup['regional_groundwater_head']['activation']:
             write_line += "Regional groundwater head is fixed to : " + str(self.model_setup['regional_groundwater_head']['value'])
             write_line += "\n"
             write_line += "for all cells in  with x coordinate >=: " + str(self.model_setup['regional_groundwater_head']['starting_x'])
