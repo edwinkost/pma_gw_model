@@ -363,7 +363,7 @@ def main():
 
     # SET YOUR OUTPUT FOLDER HERE 
     # - cartesius
-    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test_with_regional_head/"
+    model_setup['output_folder']    = "/scratch-shared/edwinsut/test_output_yvonne/test_with_regional_head/"
     #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
     #~ # - WINDOWS
@@ -465,8 +465,8 @@ def main():
     #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
     
     # - forking only work for linux
-    #~ mcModel.setForkSamples(fork = True, nrCPUs = 20)
-    mcModel.setForkSamples(fork = True, nrCPUs = 5)
+    mcModel.setForkSamples(fork = True, nrCPUs = 20)
+    #~ mcModel.setForkSamples(fork = True, nrCPUs = 5)
     
     # run
     mcModel.run()
