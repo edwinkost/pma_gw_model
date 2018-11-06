@@ -437,7 +437,7 @@ def main():
     model_setup['regional_groundwater_head']['value'] = 1.00
     # - position, all cells in the 'right' side of this will have fixed heads as defined above
     model_setup['regional_groundwater_head']['starting_x'] = 26.00 
-    model_setup['regional_groundwater_head']['activation'] = True 
+    model_setup['regional_groundwater_head']['activation']    = True 
     #~ model_setup['regional_groundwater_head']['activation'] = False
     
     
