@@ -364,11 +364,13 @@ def main():
     # SET YOUR OUTPUT FOLDER HERE 
     # - cartesius
     #~ model_setup['output_folder'] = "/scratch-shared/edwinsut/test_output_yvonne/test_with_regional_head/"
-    model_setup['output_folder']    = "/scratch-shared/edwinsut/test_output_yvonne/test_without_regional_head/"
+    #~ model_setup['output_folder'] = "/scratch-shared/edwinsut/test_output_yvonne/test_without_regional_head/"
     #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
     #~ # - WINDOWS
     #~ model_setup['output_folder'] = "C:/test/"
+    model_setup['output_folder']    = "C:/test_output_yvonne/test_with_regional_head/"
+    #~ model_setup['output_folder'] = "C:/test_output_yvonne/test_without_regional_head/"
     
     # create output folder
     cleaning_previous_output_folder = True
@@ -437,8 +439,8 @@ def main():
     model_setup['regional_groundwater_head']['value'] = 1.00
     # - position, all cells in the 'right' side of this will have fixed heads as defined above
     model_setup['regional_groundwater_head']['starting_x'] = 26.00 
-    #~ model_setup['regional_groundwater_head']['activation'] = True 
-    model_setup['regional_groundwater_head']['activation']    = False
+    model_setup['regional_groundwater_head']['activation']    = True 
+    #~ model_setup['regional_groundwater_head']['activation'] = False
     
     
     # PS: There are also more input files/values that are harcoded in the other parts.   
