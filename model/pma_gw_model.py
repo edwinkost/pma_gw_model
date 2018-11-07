@@ -123,6 +123,10 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         #~ self.ibound = pcr.ifthenelse(pcr.xcoordinate(clone_map) < -75., pcr.nominal(-1.), pcr.nominal(1.))
         #~ pcr.aguila(self.ibound)
         
+        # ibound with regional groundwater head values
+        if self.model_setup['regional_groundwater_head']['activation']:
+            self.ibound = pcr.ifthenelse(pcr.xcoordinate(pcr.boolean(1.0)) >= self.model_setup['regional_groundwater_head']['starting_x'], pcr.nominal(-1.), self.ibound)
+
         
         # parameter values for the SOLVER package 
         self.MXITER = 50                 # maximum number of outer iterations           # Deltares use 50
@@ -140,6 +144,10 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - Gerben recommends to start using 0.8 m
         self.initial_head = pcr.spatial(pcr.scalar(0.8))
         
+        # regional groundwater head
+        if self.model_setup['regional_groundwater_head']['activation']:
+            self.initial_head = pcr.ifthenelse(pcr.xcoordinate(pcr.boolean(1.0)) >= self.model_setup['regional_groundwater_head']['starting_x'], self.model_setup['regional_groundwater_head']['value'], self.initial_head)
+
 
         # initialise timeoutput object for reporting time series in txt files
         # - groundwater head
@@ -170,6 +178,15 @@ class PantaiMukaAirTanahModel(DynamicModel, MonteCarloModel):
         # - soil conductivity
         write_line += "Soil conductivity (m.day-1): " + str(inp_soil_conductivity)
         write_line += "\n"
+        # - regional groundwater head (optional):
+        if self.model_setup['regional_groundwater_head']['activation']:
+            write_line += "Regional groundwater head is fixed to : " + str(self.model_setup['regional_groundwater_head']['value'])
+            write_line += "\n"
+            write_line += "for all cells in  with x coordinate >=: " + str(self.model_setup['regional_groundwater_head']['starting_x'])
+            write_line += "\n"
+        else:
+            write_line += "NO regional groundwater head. "
+            write_line += "\n"
         # - sample number
         write_line += "PCRaster sample number: " + str(self.currentSampleNumber())
         write_line += "\n"
@@ -346,11 +363,14 @@ def main():
 
     # SET YOUR OUTPUT FOLDER HERE 
     # - cartesius
-    model_setup['output_folder']    = "/scratch-shared/edwinhs/test_output_yvonne/test/"
+    #~ model_setup['output_folder'] = "/scratch-shared/edwinsut/test_output_yvonne/test_with_regional_head/"
+    #~ model_setup['output_folder'] = "/scratch-shared/edwinsut/test_output_yvonne/test_without_regional_head/"
     #~ # - speedy
     #~ model_setup['output_folder'] = "/scratch/edwin/test_output_yvonne/test_using_old_pcraster/"
     #~ # - WINDOWS
     #~ model_setup['output_folder'] = "C:/test/"
+    model_setup['output_folder']    = "C:/test_output_yvonne/test_with_regional_head/"
+    #~ model_setup['output_folder'] = "C:/test_output_yvonne/test_without_regional_head/"
     
     # create output folder
     cleaning_previous_output_folder = True
@@ -391,22 +411,38 @@ def main():
     
     
     # conductivity values (m.day-1) in a list: value for every sample
-    model_setup['soil_conductivity'] = [10.0,
-                                        0.10,
-                                        0.20,
-                                        0.50,
-                                        1.00,
-                                        2.00,
-                                        5.00,
-                                        15.0,
+    model_setup['soil_conductivity'] = [100.,
+                                        75.0,
+                                        70.0,
+                                        65.0,
+                                        50.0,
+                                        45.0,
+                                        40.0,
+                                        35.0,
+                                        30.0,
+                                        25.0,
                                         20.0,
-                                        50.0]
+                                        15.0,
+                                        10.0,
+                                        5.0,
+                                        2.0,
+                                        1.0]
     
     # number of samples
     # - based on number of conductivity values
     number_of_samples = len(model_setup['soil_conductivity'])
     
 
+    # regional groundwater head (m from MSL) boundary condition (inland side)
+    model_setup['regional_groundwater_head'] = {}
+    # - value (m, from MSL)
+    model_setup['regional_groundwater_head']['value'] = 1.00
+    # - position, all cells in the 'right' side of this will have fixed heads as defined above
+    model_setup['regional_groundwater_head']['starting_x'] = 26.00 
+    model_setup['regional_groundwater_head']['activation']    = True 
+    #~ model_setup['regional_groundwater_head']['activation'] = False
+    
+    
     # PS: There are also more input files/values that are harcoded in the other parts.   
 
 
@@ -436,8 +472,8 @@ def main():
     #~ mcModel = MonteCarloFramework(dynamicModel, nrSamples = 1)
     
     # - forking only work for linux
-    #~ mcModel.setForkSamples(fork = True, nrCPUs = 20)
-    mcModel.setForkSamples(fork = True, nrCPUs = 5)
+    mcModel.setForkSamples(fork = True, nrCPUs = 10)
+    #~ mcModel.setForkSamples(fork = True, nrCPUs = 5)
     
     # run
     mcModel.run()
